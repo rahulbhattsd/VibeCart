@@ -1,0 +1,76 @@
+/* src/components/LoginSignup.css */
+
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 4rem auto;
+    padding: 2.5rem 2rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  .form-container h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    color: #333;
+  }
+  
+  .form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .form-container input,
+  .form-container select {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s;
+  }
+  
+  .form-container input:focus,
+  .form-container select:focus {
+    outline: none;
+    border-color: #6c5ce7;
+  }
+  
+  .form-container button {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #6c5ce7;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  
+  .form-container button:hover {
+    background: #5941c3;
+  }
+  
+  .form-container button:active {
+    transform: scale(0.98);
+  }
+  
+  .form-container hr {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid #eee;
+  }
+  
+  .form-container .toggle-btn {
+    background: transparent;
+    color: #6c5ce7;
+    font-size: 0.95rem;
+  }
+  
+  .form-container .toggle-btn:hover {
+    text-decoration: underline;
+  }
+  

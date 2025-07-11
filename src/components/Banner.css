@@ -1,0 +1,279 @@
+/* Banner.css */
+.banner {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #a5d8ff 0%, #cc99ff 100%);
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.shape1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), transparent);
+  top: -100px;
+  left: -100px;
+}
+
+.shape2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle at 70% 70%, rgba(255, 175, 189, 0.8), transparent);
+  bottom: -150px;
+  right: -150px;
+}
+
+.slides {
+  display: flex;
+  transition: transform 0.8s ease-in-out;
+  height: 100%;
+}
+
+.slide {
+  min-width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.responsive-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.slide-content {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  color: #222;
+  z-index: 1;
+  max-width: 40%;
+}
+
+.slide-content h2 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.slide-content p {
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
+}
+
+.slide-buttons button {
+  margin-right: 1rem;
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  z-index: 1;
+}
+
+.shop-btn {
+  background: linear-gradient(135deg,#cc99ff 0%, #a0a0ff 100%);
+  color: #fff;
+}
+
+.shop-btn:hover {
+  background: linear-gradient(135deg, #a0ffee 0%, #afbfff80 100%);
+}
+
+.explore-btn {
+  background: transparent;
+  color: #222;
+  border: 2px solid #222;
+}
+
+.explore-btn:hover {
+  background: #222;
+  color: #fafafa;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(34, 34, 34, 0);
+  border: none;
+  padding: 0.75rem;
+  border-radius: 50%;
+  color: #fafafa;
+  cursor: pointer;
+  font-size: 1.25rem;
+  z-index: 1;
+  height: 40vh;
+  max-width: 80vh;
+  
+}
+
+.prev {
+  left: 1rem;
+}
+
+.next {
+  right: 1rem;
+}
+.responsive-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  max-width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .slide-content h2 {
+    font-size: 2.5rem;
+  }
+  .slide-content p {
+    font-size: 1rem;
+  }
+  .slide-buttons button {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .slide-content h2 {
+    font-size: 2rem;
+  }
+  .slide-content p {
+    font-size: 0.95rem;
+  }
+  .slide-buttons button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .arrow {
+    padding: 0.5rem;
+  }
+  .slide-content {
+    max-width: 80%;
+    left: 5%;
+  }
+}
+
+@media (max-width: 480px) {
+  .slide-content h2 {
+    font-size: 1.5rem;
+  }
+  .slide-content p {
+    font-size: 0.85rem;
+  }
+  .slide-buttons button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    height: 60vh;
+  }
+
+  .slide,
+  .responsive-image {
+    height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    height: 50vh;
+  }
+
+  .slide,
+  .responsive-image {
+    height: 50vh;
+  }
+}
+
+.banner {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #d3cce3 0%, #e9e4f0 100%);
+
+}
+
+/* updated responsive-image style */
+.responsive-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  max-height: 80vh;
+  max-width: 100%;
+  aspect-ratio: 16 / 9; /* Optional: keep it neat on large screens */
+}
+
+/* 👇 ADD this to make the image behave better on larger displays */
+@media (min-width: 1440px) {
+  .banner {
+    height: 70vh;
+  }
+
+  .slide,
+  .responsive-image {
+    height: 70vh;
+    object-fit: contain; /* or try 'cover' depending on your image composition */
+  }
+
+  .slide-content h2 {
+    font-size: 3.5rem;
+  }
+}
+
+/* existing media queries stay same but here for reference */
+@media (max-width: 1024px) {
+  .slide-content h2 {
+    font-size: 2.5rem;
+  }
+  .slide-buttons button {
+    padding: 0.6rem 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    height: 60vh;
+  }
+
+  .slide,
+  .responsive-image {
+    height: 60vh;
+  }
+
+  .slide-content h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    height: 50vh;
+  }
+
+  .slide,
+  .responsive-image {
+    height: 50vh;
+  }
+
+  .slide-content h2 {
+    font-size: 1.5rem;
+  }
+}

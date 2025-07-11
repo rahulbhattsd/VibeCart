@@ -1,0 +1,134 @@
+/* Purchase.css */
+.purchase {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.purchase img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+}
+
+.details h2 {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  line-height: 1.2;
+  color: #1f2a38;
+}
+
+.price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #6a0dad;
+  margin-bottom: 1.5rem;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.options label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+  color: #5a6a7a;
+}
+
+.options select,
+.options input[type="number"] {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dde1e7;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.options select:focus,
+.options input[type="number"]:focus {
+  outline: none;
+  border-color: #6a0dad;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #6a0dad;
+  color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #5a0c9c;
+  box-shadow: 0 4px 12px rgba(106, 13, 173, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #1f2a38;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+  background-color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(31, 42, 56, 0.1);
+  transform: translateY(-2px);
+}
+
+.error {
+  color: #dc2626;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .purchase {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+  .options {
+    grid-template-columns: 1fr;
+  }
+  .btn {
+    width: 100%;
+  }
+}
+
+ 
