@@ -13,11 +13,30 @@ const { User, Listing, CartItem, Order } = require('./schema');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS configuration
+//build paths 
+const path = require('path');
+const fs = require('fs');
+// Serve frontend build files from Vite's dist directory
+const distPath = path.join(__dirname, '../dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://your-render-frontend-url.onrender.com', // Replace with actual domain after deploy
+  'https://your-render-backend-url.onrender.com'
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true,
 }));
+
 
 // Session configuration
 app.use(session({

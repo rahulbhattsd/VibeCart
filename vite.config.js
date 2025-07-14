@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-// vite.config.js
-export default {
+export default defineConfig({
+  plugins: [react()],
   server: {
     proxy: {
       '/api': {
@@ -13,6 +12,10 @@ export default {
         rewrite: path => path.replace(/^\/api/, '')
       }
     }
+  },
+  build: {
+    outDir: 'dist'  // 👈 IMPORTANT so server.js can serve it
   }
-};
+});
+
 
