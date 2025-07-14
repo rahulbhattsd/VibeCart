@@ -3,15 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "description": "Fullstack Vite + Express + MongoDB + Passport + Razorpay app",
   "main": "eslint.config.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm install && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    
-    
     "start": "cd Backend && npm install && node server.js",
     "heroku-postbuild": "npm run build"
   },
@@ -46,10 +44,10 @@
     "nodemon": "^3.1.9",
     "vite": "^6.3.1"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "engines": {
-    "node": "18.x"
-  }
+  "license": "ISC"
 }
