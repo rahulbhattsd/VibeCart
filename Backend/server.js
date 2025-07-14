@@ -28,7 +28,7 @@ if (fs.existsSync(distPath)) {
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://your-render-frontend-url.onrender.com', // Replace with actual domain after deploy
+  'https://vibecart-eo6e.onrender.com', // Replace with actual domain after deploy
   'https://your-render-backend-url.onrender.com'
 ];
 
