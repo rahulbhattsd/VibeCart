@@ -100,7 +100,7 @@ function ensureAuth(req, res, next) {
 //payment 
 
 const paymentsRouter = require('./payment.js');
-app.use('/api/payments/:id', paymentsRouter);
+app.use('/api/payments', paymentsRouter);
 
 
 // ---------- Auth Routes ----------
