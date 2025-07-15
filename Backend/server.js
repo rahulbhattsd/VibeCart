@@ -1,6 +1,7 @@
 // ======= server.js (all routes in one file) =======
 const express = require('express');
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
@@ -43,6 +44,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
   cookie: { httpOnly: true, sameSite: 'lax', secure: false }
 }));
 
@@ -100,7 +102,7 @@ function ensureAuth(req, res, next) {
 //payment 
 
 const paymentsRouter = require('./payment.js');
-app.use('api/payments', paymentsRouter);
+app.use('/api/payments', paymentsRouter);
 
 
 // ---------- Auth Routes ----------
