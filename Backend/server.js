@@ -17,14 +17,14 @@ const PORT = process.env.PORT || 5000;
 const path = require('path');
 const fs = require('fs');
 // Serve frontend build files from Vite's dist directory
-const distPath = path.join(__dirname, '../dist');
-if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
+// const distPath = path.join(__dirname, '../dist');
+// if (fs.existsSync(distPath)) {
+//   app.use(express.static(distPath));
 
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
+//   app.get('*', (req, res) => {
+//     res.sendFile(path.join(distPath, 'index.html'));
+//   });
+// }
 
 const allowedOrigins = [
   'http://localhost:5173',
@@ -100,7 +100,7 @@ function ensureAuth(req, res, next) {
 //payment 
 
 const paymentsRouter = require('./payment.js');
-app.use('/api/payments', paymentsRouter);
+app.use('api/payments', paymentsRouter);
 
 
 // ---------- Auth Routes ----------
@@ -211,6 +211,7 @@ app.get('/listings/:id', async (req, res) => {
     res.json(listing);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
+
   }
 });
 
@@ -392,12 +393,24 @@ app.delete('/orders/:id', ensureAuth, async (req, res) => {
   }
 });
 
+app.use((req, res, next) => {
+  if (req.url.includes('/:')) {
+    return res.status(400).json({ error: 'Invalid route path format' });
+  }
+  next();
+});
 
 // ---------- User Route ----------
 app.get('/me', ensureAuth, (req, res) => res.json({ user: req.user }));
 
 // Start server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));// schema.js
+try {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+} catch (error) {
+  console.error('Server failed to start:', error);
+}
 
 
 
