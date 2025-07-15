@@ -29,8 +29,7 @@ const fs = require('fs');
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://vibecart-eo6e.onrender.com', // Replace with actual domain after deploy
-  'https://your-render-backend-url.onrender.com'
+  'https://vibecart-eo6e.onrender.com'
 ];
 
 app.use(cors({
