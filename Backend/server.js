@@ -93,6 +93,12 @@ passport.deserializeUser(async (id, done) => {
     done(e);
   }
 });
+// ... your app.use('/api', api) and other logic ...
+
+// Serve frontend in production
+
+
+
 
 // Auth check middleware
 function ensureAuth(req, res, next) {
@@ -395,15 +401,20 @@ app.delete('/orders/:id', ensureAuth, async (req, res) => {
   }
 });
 
-app.use((req, res, next) => {
-  if (req.url.includes('/:')) {
-    return res.status(400).json({ error: 'Invalid route path format' });
-  }
-  next();
-});
+
 
 // ---------- User Route ----------
 app.get('/me', ensureAuth, (req, res) => res.json({ user: req.user }));
+
+const distPath = path.join(__dirname, '../dist');
+app.use(express.static(distPath));
+
+// ✅ FIXED fallback route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+
 
 // Start server
 try {
