@@ -2,6 +2,7 @@
   "name": "vibecart-fullstack",
   "private": true,
   "version": "1.0.0",
+  "homepage": ".", 
   "type": "module",
   "description": "Fullstack Vite + Express + MongoDB + Passport + Razorpay app",
   "main": "eslint.config.js",

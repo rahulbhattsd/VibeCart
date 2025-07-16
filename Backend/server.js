@@ -17,15 +17,7 @@ const PORT = process.env.PORT || 5000;
 //build paths 
 const path = require('path');
 const fs = require('fs');
-// Serve frontend build files from Vite's dist directory
-// const distPath = path.join(__dirname, '../dist');
-// if (fs.existsSync(distPath)) {
-//   app.use(express.static(distPath));
 
-//   app.get('*', (req, res) => {
-//     res.sendFile(path.join(distPath, 'index.html'));
-//   });
-// }
 
 const allowedOrigins = [
   'http://localhost:5173',
@@ -146,9 +138,11 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile','email'] }));
+const CLIENT_HOME_URL = process.env.CLIENT_HOME_URL || 'http://localhost:5173';
+
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => res.redirect('http://localhost:5173/login?google=success')
+  (req, res) => res.redirect(`${CLIENT_HOME_URL}/login?google=success`)
 );
 
 app.get('/logout', (req, res) => {

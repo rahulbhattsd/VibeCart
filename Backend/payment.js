@@ -1,9 +1,8 @@
-// Backend/payment.js
 const express = require('express');
 const router = express.Router();
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-const { Order, CartItem } = require('./schema');  // or './models'
+const { Order, CartItem } = require('./schema');
 require('dotenv').config();
 
 const razorpay = new Razorpay({
@@ -11,13 +10,14 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-// Create Razorpay order (no auth guard)
+// Create Razorpay order
 router.post('/razorpay/order', async (req, res) => {
   console.log('→ POST /api/payments/razorpay/order', req.body);
   const { amount, currency } = req.body;
+
   try {
     const response = await razorpay.orders.create({
-      amount,      // in paise
+      amount,
       currency,
       receipt: `rcpt_${Date.now()}`
     });
@@ -28,7 +28,7 @@ router.post('/razorpay/order', async (req, res) => {
   }
 });
 
-// Verify payment and save order (no auth guard)
+// Verify Razorpay payment and create order
 router.post('/razorpay/verify', async (req, res) => {
   console.log('→ POST /api/payments/razorpay/verify', req.body);
   const {
@@ -38,10 +38,10 @@ router.post('/razorpay/verify', async (req, res) => {
     items,
     shippingAddress,
     totalAmount,
-    paymentMethod
+    paymentMethod,
+    userId // Optional fallback for now
   } = req.body;
 
-  // Validate signature
   const generatedSig = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
     .update(`${razorpayOrderId}|${razorpayPaymentId}`)
     .digest('hex');
@@ -53,8 +53,7 @@ router.post('/razorpay/verify', async (req, res) => {
 
   try {
     const order = new Order({
-      // you’ll need to set a dummy or known user ID here for testing:
-      user: req.body.userId || null,
+      user: userId || null,
       items,
       shippingAddress,
       totalAmount,
@@ -65,6 +64,7 @@ router.post('/razorpay/verify', async (req, res) => {
         signature: razorpaySignature
       }
     });
+
     await order.save();
     await CartItem.deleteMany({ user: order.user });
     res.json({ message: 'Order placed successfully', orderId: order._id });
@@ -75,4 +75,5 @@ router.post('/razorpay/verify', async (req, res) => {
 });
 
 module.exports = router;
+
 
