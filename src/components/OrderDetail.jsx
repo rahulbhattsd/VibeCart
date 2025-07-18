@@ -1,7 +1,7 @@
 // src/components/OrderDetail.jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
+import api from '../api';
 import './OrderDetail.css';
 
 const OrderDetail = () => {
@@ -11,8 +11,7 @@ const OrderDetail = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    axios
-      .get(`/api/orders/${id}`, { withCredentials: true })
+    api.get(`/orders/${id}`)
       .then(res => setOrder(res.data))
       .catch(() => setError('Could not load order'))
       .finally(() => setLoading(false));
@@ -46,7 +45,7 @@ const OrderDetail = () => {
                 {item.listing.title}
               </Link>
               <div className="item-meta">
-                <span>Size: UK {item.size}</span>
+                {item.size && <span>Size: UK {item.size}</span>}
                 <span>Qty: {item.quantity}</span>
                 <span>Price: ₹{item.price}</span>
               </div>
@@ -68,4 +67,5 @@ const OrderDetail = () => {
 };
 
 export default OrderDetail;
+
 

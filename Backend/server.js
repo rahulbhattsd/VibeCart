@@ -94,7 +94,7 @@ function ensureAuth(req, res, next) {
 const api = express.Router();
 
 // Payments routes
-const paymentsRouter = require('./payment.js');
+const paymentsRouter = require('./payment');
 api.use('/payments', paymentsRouter);
 
 // ---------- Auth Routes ----------
@@ -132,13 +132,12 @@ api.post('/login', async (req, res) => {
   }
 });
 
-api.get('/auth/google', passport.authenticate('google', { scope: ['profile','email'] }));
+api.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 const CLIENT_HOME_URL = process.env.CLIENT_HOME_URL || 'http://localhost:5173';
-api.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => res.redirect(`${CLIENT_HOME_URL}/login?google=success`)
-);
+api.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
+  res.redirect(`${CLIENT_HOME_URL}/login?google=success`);
+});
 
 api.get('/logout', (req, res) => {
   req.logout(err => {
@@ -164,7 +163,7 @@ api.post('/listings', ensureAuth, async (req, res) => {
 api.get('/listings', async (req, res) => {
   const { page = 1, limit = 10, search, sort } = req.query;
   let query = {};
-  if (search) query.title = { $regex: search, $options: 'i' };
+  if (search) query.title = { $regex: search, $options: 'i' };  
   let sortOptions = { createdAt: -1 };
   if (sort === 'priceAsc') sortOptions = { price: 1 };
   else if (sort === 'priceDesc') sortOptions = { price: -1 };
@@ -219,9 +218,9 @@ api.get('/cart', ensureAuth, async (req, res) => {
 
 api.post('/cart', ensureAuth, async (req, res) => {
   try {
-    let	item = await CartItem.findOne({ user: req.user._id, listing: req.body.listingId, size: req.body.size });
+    let item = await CartItem.findOne({ user: req.user._id, listing: req.body.listingId, size: req.body.size });
     if (item) item.quantity += req.body.quantity;
-    else item = new CartItem({ user: req.user.__id, listing: req.body.listingId, size: req.body.size, quantity: req.body.quantity });
+    else item = new CartItem({ user: req.user._id, listing: req.body.listingId, size: req.body.size, quantity: req.body.quantity });
     const saved = await item.save();
     res.json(saved);
   } catch (err) {
@@ -304,25 +303,20 @@ api.delete('/orders/:id', ensureAuth, async (req, res) => {
   }
 });
 
-// ---------- User Route ----------
+// User route
 api.get('/me', ensureAuth, (req, res) => res.json({ user: req.user }));
 
-// Mount API router under /api
+// Mount API router
 app.use('/api', api);
 
-// Serve frontend in production
+// Static and SPA fallback
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
-
-// SPA fallback route
-app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
+app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
 
