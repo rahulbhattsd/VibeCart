@@ -184,3 +184,6 @@
 .search-button:focus {
   outline: none;
 }
+button{
+  background-color: #cc99ff;
+}

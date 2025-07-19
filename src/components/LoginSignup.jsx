@@ -94,12 +94,7 @@ export default function LoginSignup() {
       <hr />
 
       <a className="google-btn" href={`${API_BASE}/auth/google`}>
-        <img
-          src="data:image/png;base64,iVBORw0KGgo…"
-          alt="G"
-          width={20}
-          style={{ marginRight: 8 }}
-        />
+     
         Sign in with Google
       </a>
     </div>
