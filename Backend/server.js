@@ -1,60 +1,57 @@
-require('dotenv').config();
-const express       = require('express');
-const mongoose      = require('mongoose');
-const MongoStore    = require('connect-mongo');
-const session       = require('express-session');
-const cors          = require('cors');
-const passport      = require('passport');
+// ======= server.js =======
+const express = require('express');
+const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
+const cors = require('cors');
+const session = require('express-session');
+const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
-const bcrypt        = require('bcrypt');
-const path          = require('path');
+const bcrypt = require('bcrypt');
+const dotenv = require('dotenv');
+const path = require('path');
 
-// Mongoose models + payment router
+// Load environment variables
+dotenv.config();
+
+// Import Mongoose models
 const { User, Listing, CartItem, Order } = require('./schema');
-const paymentsRouter = require('./payment');
 
-const app  = express();
-const PORT = process.env.PORT;
+// Create Express app
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-// —————————————
-// 1) DATABASE
-// —————————————
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser:    true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch(err => console.error('❌ MongoDB error:', err));
-
-// —————————————
-// 2) CORS
-// —————————————
+// CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://vibecart-eo6e.onrender.com'
+];
 app.use(cors({
-  origin:      process.env.CLIENT_HOME_URL,
+  origin: allowedOrigins,
   credentials: true,
 }));
 
-// —————————————
-// 3) SESSIONS
-// —————————————
+// Session configuration
 app.use(session({
-  secret:            process.env.SESSION_SECRET,
-  resave:            false,
+  secret: process.env.SESSION_SECRET || 'yourSecretKey',
+  resave: false,
   saveUninitialized: false,
-  store:             MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-  cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure:   true    // only over HTTPS
-  }
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: { httpOnly: true, sameSite: 'lax', secure: false }
 }));
 
-// —————————————
-// 4) PASSPORT
-// —————————————
+// Passport initialization
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Body parser
+app.use(express.json());
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB error:', err));
+
+// Passport Google Strategy
 passport.serializeUser((user, done) => done(null, user._id));
 passport.deserializeUser(async (id, done) => {
   try {
@@ -91,51 +88,55 @@ passport.use(new GoogleStrategy({
     }
   }
 ));
+passport.serializeUser((user, done) => done(null, user._id));
+passport.deserializeUser(async (id, done) => {
+  try {
+    const u = await User.findById(id);
+    done(null, u || false);
+  } catch (e) {
+    done(e);
+  }
+});
 
-// —————————————
-// 5) MIDDLEWARE
-// —————————————
-app.use(express.json());
+// Auth check middleware
+function ensureAuth(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  res.status(401).json({ message: 'Unauthorized' });
+}
 
-// —————————————
-// 6) ROUTES
-// —————————————
+// Create API router
 const api = express.Router();
 
-// Payments
+// Payments routes
+const paymentsRouter = require('./payment');
 api.use('/payments', paymentsRouter);
 
-// Auth
+// ---------- Auth Routes ----------
 api.post('/check-gmail', async (req, res) => {
-  const exists = await User.exists({ gmail: req.body.gmail });
+  const { gmail } = req.body;
+  const exists = await User.exists({ gmail });
   res.json({ exists: !!exists });
 });
 
 api.post('/signup', async (req, res) => {
+  const { name, gmail, pass, role } = req.body;
   try {
-    const { name, gmail, pass, role } = req.body;
-    if (await User.exists({ gmail })) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    if (await User.exists({ gmail })) return res.status(400).json({ message: 'User already exists' });
     const hashed = await bcrypt.hash(pass, 10);
-    const user   = await User.create({ name, gmail, pass: hashed, role });
-    res.status(201).json({ message: 'Signup successful', user });
+    const newUser = await User.create({ name, gmail, pass: hashed, role });
+    res.status(201).json({ message: 'Signup successful', user: newUser });
   } catch (err) {
     res.status(500).json({ message: 'Signup error', error: err.message });
   }
 });
 
 api.post('/login', async (req, res) => {
+  const { gmail, pass } = req.body;
   try {
-    const { gmail, pass } = req.body;
     const user = await User.findOne({ gmail });
-    if (!user || !user.pass) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!user || !user.pass) return res.status(400).json({ message: 'Invalid credentials' });
     const ok = await bcrypt.compare(pass, user.pass);
-    if (!ok) {
-      return res.status(400).json({ message: 'Wrong password' });
-    }
+    if (!ok) return res.status(400).json({ message: 'Wrong password' });
     req.login(user, err => {
       if (err) return res.status(500).json({ message: 'Login error' });
       res.json({ message: 'Login successful', user });
@@ -145,16 +146,12 @@ api.post('/login', async (req, res) => {
   }
 });
 
-api.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+api.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-api.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect(`${process.env.CLIENT_HOME_URL}/login?google=success`);
-  }
-);
+const CLIENT_HOME_URL = process.env.CLIENT_HOME_URL || 'http://localhost:5173';
+api.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
+  res.redirect(`${CLIENT_HOME_URL}/login?google=success`);
+});
 
 api.get('/logout', (req, res) => {
   req.logout(err => {
@@ -165,9 +162,6 @@ api.get('/logout', (req, res) => {
     });
   });
 });
-
-// mount under /api
-app.use('/api', api);
 
 // ---------- Listing Routes ----------
 api.post('/listings', ensureAuth, async (req, res) => {
