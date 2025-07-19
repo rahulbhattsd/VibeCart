@@ -1,4 +1,3 @@
-// ======= Frontend: LoginSignup.jsx =======
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate }        from 'react-router-dom';
 import api                                from '../api';
@@ -13,7 +12,6 @@ export default function LoginSignup() {
   const nav                     = useNavigate();
   const done                    = useRef(false);
 
-  // Handle Google callback
   useEffect(() => {
     const q = new URLSearchParams(loc.search);
     if (q.get('google') === 'success' && !done.current) {
@@ -37,7 +35,7 @@ export default function LoginSignup() {
     const endpoint = isLogin ? '/login' : '/signup';
 
     if (!isLogin) {
-      const exists = (await api.post('/check-gmail', { gmail: formData.email })).data.exists;
+      const { exists } = (await api.post('/check-gmail', { gmail: formData.email })).data;
       if (exists) return alert('Account exists');
     }
 
@@ -45,10 +43,10 @@ export default function LoginSignup() {
       const payload = isLogin
         ? { gmail: formData.email, pass: formData.password }
         : {
-            name: formData.email.split('@')[0],
+            name:  formData.email.split('@')[0],
             gmail: formData.email,
-            pass: formData.password,
-            role: formData.role
+            pass:  formData.password,
+            role:  formData.role
           };
       const r = await api.post(endpoint, payload);
       localStorage.setItem('user', JSON.stringify(r.data.user));
@@ -64,20 +62,12 @@ export default function LoginSignup() {
       <h2>{isLogin ? 'Login' : 'Signup'}</h2>
       <form onSubmit={submit}>
         <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handle}
-          required
+          name="email" type="email" placeholder="Email"
+          value={formData.email} onChange={handle} required
         />
         <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handle}
-          required
+          name="password" type="password" placeholder="Password"
+          value={formData.password} onChange={handle} required
         />
         {!isLogin && (
           <select name="role" value={formData.role} onChange={handle}>
@@ -94,12 +84,12 @@ export default function LoginSignup() {
       <hr />
 
       <a className="google-btn" href={`${API_BASE}/auth/google`}>
-     
         Sign in with Google
       </a>
     </div>
   );
 }
+
 
 
 
