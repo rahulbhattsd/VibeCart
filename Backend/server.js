@@ -52,28 +52,42 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('❌ MongoDB error:', err));
 
 // Passport Google Strategy
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: '/api/auth/google/callback',
-}, async (accessToken, refreshToken, profile, done) => {
+passport.serializeUser((user, done) => done(null, user._id));
+passport.deserializeUser(async (id, done) => {
   try {
-    const email = profile.emails[0].value;
-    let user = await User.findOne({ $or: [{ googleId: profile.id }, { gmail: email }] });
-    if (user) {
-      user.googleId = profile.id;
-      user.name = user.name || profile.displayName;
-      await user.save();
-    } else {
-      user = new User({ googleId: profile.id, gmail: email, name: profile.displayName });
-      await user.save();
-    }
-    done(null, user);
-  } catch (err) {
-    done(err);
+    const u = await User.findById(id);
+    done(null, u || false);
+  } catch (e) {
+    done(e);
   }
-}));
+});
 
+passport.use(new GoogleStrategy({
+    clientID:     process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL:  `${process.env.API_BASE_URL}/api/auth/google/callback`
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    try {
+      const gmail = profile.emails[0].value;
+      let user = await User.findOne({ $or: [{ googleId: profile.id }, { gmail }] });
+      if (user) {
+        user.googleId = profile.id;
+        user.name     = user.name || profile.displayName;
+        await user.save();
+      } else {
+        user = await User.create({
+          googleId: profile.id,
+          gmail,
+          name:     profile.displayName
+        });
+      }
+      done(null, user);
+    } catch (err) {
+      done(err);
+    }
+  }
+));
 passport.serializeUser((user, done) => done(null, user._id));
 passport.deserializeUser(async (id, done) => {
   try {

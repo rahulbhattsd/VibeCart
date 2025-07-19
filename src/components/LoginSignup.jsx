@@ -1,15 +1,17 @@
-// ====== Frontend: LoginSignup.jsx ======
+// ======= Frontend: LoginSignup.jsx =======
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import api from '../api';
+import { useLocation, useNavigate }        from 'react-router-dom';
+import api                                from '../api';
 import './LoginSignup.css';
 
-const LoginSignup = () => {
-  const [isLogin, setIsLogin] = useState(true);
+const API_BASE = 'https://vibecart-eo6e.onrender.com/api';
+
+export default function LoginSignup() {
+  const [isLogin, setIsLogin]   = useState(true);
   const [formData, setFormData] = useState({ email: '', password: '', role: 'buyer' });
-  const loc = useLocation();
-  const nav = useNavigate();
-  const done = useRef(false);
+  const loc                     = useLocation();
+  const nav                     = useNavigate();
+  const done                    = useRef(false);
 
   // Handle Google callback
   useEffect(() => {
@@ -23,7 +25,7 @@ const LoginSignup = () => {
           localStorage.setItem('user', JSON.stringify(r.data.user));
           nav('/');
         })
-        .catch(e => console.error(e));
+        .catch(console.error);
     }
   }, [loc, nav]);
 
@@ -35,7 +37,6 @@ const LoginSignup = () => {
     const endpoint = isLogin ? '/login' : '/signup';
 
     if (!isLogin) {
-      // Check if account exists
       const exists = (await api.post('/check-gmail', { gmail: formData.email })).data.exists;
       if (exists) return alert('Account exists');
     }
@@ -92,9 +93,9 @@ const LoginSignup = () => {
       </button>
       <hr />
 
-      <a className="google-btn" href="/api/auth/google">
+      <a className="google-btn" href={`${API_BASE}/auth/google`}>
         <img
-          src="data:image/png;base64,iVBORw0KGgo..."
+          src="data:image/png;base64,iVBORw0KGgo…"
           alt="G"
           width={20}
           style={{ marginRight: 8 }}
@@ -103,9 +104,8 @@ const LoginSignup = () => {
       </a>
     </div>
   );
-};
+}
 
-export default LoginSignup;
 
 
 
