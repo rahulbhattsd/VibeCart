@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';      // <-- use your axios instance already configured for production
 import './Profile.css';
 
 const Profile = () => {
@@ -14,7 +14,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get('http://localhost:5000/logout', { withCredentials: true });
+      await api.get('/logout', { withCredentials: true });
       localStorage.removeItem('user');
       setUser(null);
       alert('👋 Logged out successfully!');
@@ -38,16 +38,19 @@ const Profile = () => {
           className="profile-avatar"
           style={{ height: '7rem', borderRadius: '50%' }} 
         />
-        <h2>{user.name || user.gmail?.split('@')[0]}</h2>
+        <h2>{user.name || user.gmail.split('@')[0]}</h2>
         <p><strong>Role:</strong> {user.role || 'Buyer'}</p>
-        <p><strong>Email:</strong> {user.gmail || user.email}</p>
+        <p><strong>Email:</strong> {user.gmail}</p>
         <p><strong>Joined:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
 
-        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </div>
   );
 };
 
 export default Profile;
+
 

@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -15,13 +14,11 @@ const Navbar = () => {
   const navigate                    = useNavigate();
   const navRef                      = useRef(null);
 
-  // keep user in sync
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     setUser(storedUser);
   }, [location]);
 
-  // close mobile menu on outside click
   useEffect(() => {
     const handleOutsideClick = e => {
       if (isMobile && navRef.current && !navRef.current.contains(e.target)) {
@@ -32,7 +29,6 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [isMobile]);
 
-  // handle search form submit
   const handleSearchSubmit = e => {
     e.preventDefault();
     const q = searchTerm.trim();
@@ -43,10 +39,9 @@ const Navbar = () => {
     }
   };
 
-  // handle logout
   const handleLogout = async () => {
     try {
-      await api.get('/logout');
+      await api.get('/logout', { withCredentials: true });
       localStorage.removeItem('user');
       setUser(null);
       navigate('/login');
@@ -128,6 +123,7 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
 
 
 

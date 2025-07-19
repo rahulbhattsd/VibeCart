@@ -2,11 +2,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.9); /* soft white overlay */
+  background-color: rgba(255, 255, 255, 0.9);
   padding: 10px 20px;
   position: relative;
   z-index: 10;
-  backdrop-filter: blur(10px); /* optional: makes it classy */
+  backdrop-filter: blur(10px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -28,21 +28,32 @@
 
 .nav-links li {
   margin: 0 15px;
+
+  /* make all list items align their contents centrally */
+  display: flex;
+  align-items: center;
 }
 
-.nav-links li a {
+.nav-links li a,
+.logout-btn {
   text-decoration: none;
   color: #333;
   font-size: 1rem;
   padding: 8px 12px;
   border-radius: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-.nav-links li a:hover {
+.nav-links li a:hover,
+.logout-btn:hover {
   background: #cc99ff;
   color: white;
 }
+
+
 
 /* Mobile Menu Icon */
 .mobile-menu-icon {
@@ -73,56 +84,38 @@
   z-index: 11;
 }
 
-.nav-links-mobile li a {
+.nav-links-mobile li {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-links-mobile li a,
+.nav-links-mobile .logout-btn {
   display: block;
   width: 100%;
   padding: 10px 0;
   color: #333;
   text-decoration: none;
-  border-radius: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-.nav-links-mobile li a:hover {
+.nav-links-mobile li a:hover,
+.nav-links-mobile .logout-btn:hover {
   background: #cc99ff;
   color: white;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .nav-links {
-    display: none;
-  }
-
-  .mobile-menu-icon {
-    display: block;
-  }
+  .nav-links { display: none; }
+  .mobile-menu-icon { display: block; }
 }
 
-/* Cart Icon */
-#cart {
-  display: inline-block;
-  position: relative;
-  padding: 0;
-}
-
-.cart-icon {
-  width: 1.5rem;
-  height: auto;
-}
-
-@media (max-width: 768px) {
-  .cart-icon {
-    width: 1.25rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .cart-icon {
-    width: 1rem;
-    
-  }
-} 
 /* Search bar */
 .search-bar {
   flex: 1;
@@ -181,9 +174,16 @@
   filter: brightness(1.2);
 }
 
-.search-button:focus {
-  outline: none;
+/* Cart Icon */
+.cart-link img {
+  width: 1.5rem;
 }
-button{
-  background-color: #cc99ff;
+
+@media (max-width: 768px) {
+  .cart-link img { width: 1.25rem; }
 }
+
+@media (max-width: 480px) {
+  .cart-link img { width: 1rem; }
+}
+
