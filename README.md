@@ -76,4 +76,4 @@ JWT_SECRET=your_jwt_secret
 
 ---
 
-<p>© 2024 VibeCart. All rights reserved.</p>
+<p>© 2025 VibeCart. All rights reserved.</p>
