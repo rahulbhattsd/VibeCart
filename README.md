@@ -74,6 +74,10 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 JWT_SECRET=your_jwt_secret
 ```
 
+## 👤 Author
+**Rahul Bhatt**  
+[LinkedIn](https://www.linkedin.com/in/rahulbhatt-developer)
+
 ---
 
 <p>© 2025 VibeCart. All rights reserved.</p>
