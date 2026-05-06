@@ -88,15 +88,6 @@ passport.use(new GoogleStrategy({
     }
   }
 ));
-passport.serializeUser((user, done) => done(null, user._id));
-passport.deserializeUser(async (id, done) => {
-  try {
-    const u = await User.findById(id);
-    done(null, u || false);
-  } catch (e) {
-    done(e);
-  }
-});
 
 // Auth check middleware
 function ensureAuth(req, res, next) {

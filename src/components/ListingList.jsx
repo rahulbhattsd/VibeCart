@@ -1,19 +1,25 @@
 // src/components/ListingList.jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate, Link } from 'react-router-dom';
 import './ListingList.css';
 
-const ListingList = () => {
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
+const ListingList = ({ listings: providedListings }) => {
+  const [listings, setListings] = useState(providedListings || []);
+  const [loading, setLoading] = useState(!providedListings);
   const [err, setErr] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (providedListings) {
+      setListings(providedListings);
+      setLoading(false);
+      return;
+    }
+
     const fetchListings = async () => {
       try {
-        const res = await axios.get('/api/listings');
+        const res = await api.get('/listings');
         setListings(res.data);
       } catch (e) {
         console.error(e);
@@ -23,15 +29,20 @@ const ListingList = () => {
       }
     };
     fetchListings();
-  }, []);
+  }, [providedListings]);
 
   const addToCart = async (listingId, size) => {
     try {
-      await axios.post('/api/cart', { listingId, size, quantity: 1 }, { withCredentials: true });
+      await api.post('/cart', { listingId, size, quantity: 1 });
       alert('Added to cart');
     } catch (e) {
       console.error(e);
-      alert('Could not add to cart');
+      if (e.response?.status === 401) {
+        alert('Please login to add items to your cart');
+        navigate('/login');
+      } else {
+        alert(e.response?.data?.message || 'Could not add to cart');
+      }
     }
   };
 

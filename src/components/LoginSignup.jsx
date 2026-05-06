@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate }        from 'react-router-dom';
-import api                                from '../api';
+import api, { apiUrl }                    from '../api';
 import './LoginSignup.css';
-
-const API_BASE = 'https://vibecart-eo6e.onrender.com/api';
 
 export default function LoginSignup() {
   const [isLogin, setIsLogin]   = useState(true);
@@ -83,7 +81,7 @@ export default function LoginSignup() {
       </button>
       <hr />
 
-      <a className="google-btn" href={`${API_BASE}/auth/google`}>
+      <a className="google-btn" href={apiUrl('/auth/google')}>
         Sign in with Google
       </a>
     </div>
