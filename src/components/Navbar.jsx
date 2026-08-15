@@ -10,14 +10,58 @@ const Navbar = () => {
   const [isMobile, setIsMobile]     = useState(false);
   const [user, setUser]             = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [autocompleteResults, setAutocompleteResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [cartCount, setCartCount]   = useState(0);
   const location                    = useLocation();
   const navigate                    = useNavigate();
   const navRef                      = useRef(null);
 
   useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm.trim()) {
+        api.get(`/listings?search=${searchTerm}&limit=5`)
+          .then(res => {
+            const listings = Array.isArray(res.data) ? res.data : (res.data.listings || []);
+            setAutocompleteResults(listings);
+            setShowDropdown(true);
+          })
+          .catch(err => console.error(err));
+      } else {
+        setAutocompleteResults([]);
+        setShowDropdown(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const fetchCartCount = () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      api.get('/cart')
+        .then(res => {
+          const count = res.data.reduce((acc, item) => acc + item.quantity, 0);
+          setCartCount(count);
+        })
+        .catch(() => setCartCount(0));
+    } else {
+      const guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+      const count = guestCart.reduce((acc, item) => acc + item.quantity, 0);
+      setCartCount(count);
+    }
+  };
+
+  useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     setUser(storedUser);
+    fetchCartCount();
   }, [location]);
+
+  useEffect(() => {
+    window.addEventListener('cartUpdated', fetchCartCount);
+    return () => window.removeEventListener('cartUpdated', fetchCartCount);
+  }, []);
 
   useEffect(() => {
     const handleOutsideClick = e => {
@@ -35,6 +79,7 @@ const Navbar = () => {
     if (q) {
       navigate(`/search?q=${encodeURIComponent(q)}`);
       setSearchTerm('');
+      setShowDropdown(false);
       setIsMobile(false);
     }
   };
@@ -58,16 +103,43 @@ const Navbar = () => {
       </div>
 
       <form className="search-bar" onSubmit={handleSearchSubmit}>
-        <div className="search-input-wrapper">
+        <div className="search-input-wrapper" style={{ position: 'relative' }}>
           <input
             type="text"
             placeholder="Search products..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
+            onFocus={() => { if (searchTerm.trim() && autocompleteResults.length > 0) setShowDropdown(true); }}
           />
           <button type="submit" className="search-button" aria-label="Search">
             <img src={searchIcon} alt="Search" className="search-icon-img" />
           </button>
+
+          {showDropdown && autocompleteResults.length > 0 && (
+            <ul className="autocomplete-dropdown" style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              background: 'white', listStyle: 'none', padding: '0.5rem 0',
+              margin: '0.25rem 0 0 0', borderRadius: '8px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)', zIndex: 1000,
+              maxHeight: '300px', overflowY: 'auto'
+            }}>
+              {autocompleteResults.map(item => (
+                <li key={item._id} style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #eee' }}>
+                  <Link
+                    to={`/purchase/${item._id}`}
+                    style={{ textDecoration: 'none', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}
+                    onClick={() => { setSearchTerm(''); setShowDropdown(false); setIsMobile(false); }}
+                  >
+                    {item.imageUrl && <img src={item.imageUrl} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />}
+                    <div>
+                      <div style={{ fontWeight: '500' }}>{item.title}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#666' }}>₹{item.price}</div>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </form>
 
@@ -102,12 +174,21 @@ const Navbar = () => {
         )}
 
         <li>
-          <Link to="/cart" className="cart-link" title="Cart">
+          <Link to="/cart" className="cart-link" title="Cart" style={{ position: 'relative' }}>
             <img
               src={cartIcon}
               alt="Cart"
               style={{ height: '2rem', borderRadius: '50%' }}
             />
+            {cartCount > 0 && (
+              <span style={{
+                position: 'absolute', top: '-5px', right: '-10px',
+                background: '#ef4444', color: 'white', borderRadius: '50%',
+                padding: '2px 6px', fontSize: '0.75rem', fontWeight: 'bold'
+              }}>
+                {cartCount}
+              </span>
+            )}
           </Link>
         </li>
       </ul>

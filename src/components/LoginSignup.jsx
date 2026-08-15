@@ -48,6 +48,21 @@ export default function LoginSignup() {
           };
       const r = await api.post(endpoint, payload);
       localStorage.setItem('user', JSON.stringify(r.data.user));
+
+      // Merge guest cart
+      const guestCart = JSON.parse(localStorage.getItem('guestCart'));
+      if (guestCart && guestCart.length > 0) {
+        for (const item of guestCart) {
+          try {
+            await api.post('/cart', { listingId: item.listing._id, size: item.size, quantity: item.quantity });
+          } catch (e) {
+            console.error("Failed to merge cart item", e);
+          }
+        }
+        localStorage.removeItem('guestCart');
+        window.dispatchEvent(new Event('cartUpdated'));
+      }
+
       alert(r.data.message);
       nav('/');
     } catch (err) {
