@@ -20,7 +20,7 @@ const Navbar = () => {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm.trim()) {
-        api.get(`/listings?search=${searchTerm}&limit=5`)
+        api.get(`/products/search?q=${searchTerm}&limit=5`)
           .then(res => {
             const listings = Array.isArray(res.data) ? res.data : (res.data.listings || []);
             setAutocompleteResults(listings);

@@ -11,6 +11,7 @@ const Listing = lazy(() => import('./components/Listing.jsx'));
 const Cart = lazy(() => import('./components/Cart.jsx'));
 const Orders = lazy(() => import('./components/Orders.jsx'));
 const OrderDetail = lazy(() => import('./components/OrderDetail.jsx'));
+const OrderConfirmation = lazy(() => import('./components/OrderConfirmation.jsx'));
 const Purchase = lazy(() => import('./components/Purchase.jsx'));
 const SearchResults = lazy(() => import('./components/SearchResults'));
 const Trendy = lazy(() => import('./components/Trendy'));
@@ -70,6 +71,7 @@ const App = () => {
          <Route path="/purchase/:id" element={<Purchase />} />
          <Route path="/orders" element={<Orders />} />
          <Route path="/orders/:id" element={<OrderDetail />} />
+         <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
         <Route path="/search" element={<SearchResults />} />
          <Route path="/trending" element={<Trendy />} />
          <Route path="/about-us" element={<AboutUs />} />

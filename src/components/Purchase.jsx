@@ -13,6 +13,7 @@ const Purchase = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [mainImage, setMainImage] = useState('');
 
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
@@ -26,6 +27,7 @@ const Purchase = () => {
     axios.get(`/api/listings/${id}`)
       .then(res => {
         setListing(res.data);
+        setMainImage(res.data.imageUrl);
         const firstSize = Object.keys(res.data.inventory)[0];
         setSize(firstSize);
         // Fetch related products (same category, excluding current)
@@ -103,7 +105,7 @@ const Purchase = () => {
           order_id: razorpayOrderId,
           handler: async (response) => {
             // 3. Verify & place order
-            await axios.post(
+            const { data: verifyData } = await axios.post(
               'http://localhost:5000/api/payments/razorpay/verify',
               {
                 razorpayOrderId,
@@ -116,8 +118,7 @@ const Purchase = () => {
               },
               { withCredentials: true }
             );
-            alert('Payment successful');
-            navigate('/orders');
+            navigate(`/order-confirmation/${verifyData._id || 'razorpay-order'}`, { state: { summary: { totalAmount: listing.price * quantity, itemsCount: 1 } } });
           }
         };
         new window.Razorpay(options).open();
@@ -134,7 +135,7 @@ const Purchase = () => {
         paymentMethod: 'COD'
       };
       axios.post('/api/orders', order, { withCredentials: true })
-        .then(() => { alert('Order placed'); navigate('/orders'); })
+        .then((res) => { navigate(`/order-confirmation/${res.data._id}`, { state: { summary: { totalAmount: order.totalAmount, itemsCount: 1 } } }); })
         .catch(() => alert('Order failed'));
     }
   };
@@ -151,7 +152,7 @@ const Purchase = () => {
       setListing(res.data.listing);
       setReviewComment('');
       alert('Review added successfully');
-    } catch (err) {
+    } catch {
       alert('Must be logged in to leave a review.');
     }
   };
@@ -164,11 +165,11 @@ const Purchase = () => {
         <div className="image-gallery">
           <div style={{ overflow: 'hidden', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
             <img
-              src={listing.imageUrl}
+              src={mainImage}
               alt={listing.title}
               loading="lazy"
               style={{ width: '100%', display: 'block', transition: 'transform 0.3s ease' }}
-              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.5)'}
               onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
             />
           </div>
@@ -176,9 +177,10 @@ const Purchase = () => {
             <img
               src={listing.imageUrl}
               alt="Thumbnail"
-              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: '2px solid #6a0dad' }}
+              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: mainImage === listing.imageUrl ? '2px solid #6a0dad' : '2px solid transparent' }}
+              onClick={() => setMainImage(listing.imageUrl)}
             />
-            {/* Add more thumbnails here if listing has an array of images */}
+            {/* Additional thumbnails can be added here if listing.images array exists */}
           </div>
         </div>
 
@@ -187,24 +189,38 @@ const Purchase = () => {
         <p>{listing.description}</p>
         <p className="price">₹{listing.price.toFixed(2)}</p>
 
-        <div className="options">
-          <label>
-            Size:
-            <select value={size} onChange={e => setSize(e.target.value)}>
+        <div className="options" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Size (UK):</label>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {Object.keys(listing.inventory).map(sz => (
-                <option key={sz} value={sz}>UK {sz}</option>
+                <button
+                  key={sz}
+                  onClick={() => setSize(sz)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: size === sz ? '2px solid #6a0dad' : '1px solid #ccc',
+                    background: size === sz ? '#6a0dad' : '#fff',
+                    color: size === sz ? '#fff' : '#333',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {sz}
+                </button>
               ))}
-            </select>
-          </label>
+            </div>
+          </div>
 
-          <label>
-            Qty:
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontWeight: 'bold' }}>Qty:</span>
             <input
               type="number"
               min="1"
               max={availableStock}
               value={quantity}
               onChange={e => setQuantity(Math.min(Number(e.target.value), availableStock))}
+              style={{ width: '60px', padding: '0.25rem' }}
             />
           </label>
 
@@ -217,8 +233,8 @@ const Purchase = () => {
           </label>
         </div>
 
-        <p style={{ marginTop: '0.5rem', fontWeight: '500', color: availableStock > 0 ? '#10b981' : '#ef4444' }}>
-          {availableStock > 0 ? `In Stock: ${availableStock}` : 'Out of stock'}
+        <p style={{ marginTop: '0.5rem', fontWeight: '500', color: availableStock > 0 ? (availableStock <= 3 ? '#f59e0b' : '#10b981') : '#ef4444' }}>
+          {availableStock > 0 ? (availableStock <= 3 ? `Only ${availableStock} left!` : 'In Stock') : 'Out of stock'}
         </p>
 
         <div className="actions" style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
@@ -235,7 +251,7 @@ const Purchase = () => {
             <span>🔒</span> <span>Secure Checkout</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>🔄</span> <span>30-Day Return Policy</span>
+            <span>🔄</span> <span><a href="/privacy" style={{ color: '#555', textDecoration: 'underline' }}>Free returns within 30 days</a></span>
           </div>
         </div>
 
@@ -259,7 +275,15 @@ const Purchase = () => {
 
       {/* Reviews Section */}
       <div className="reviews-section" style={{ marginTop: '3rem', borderTop: '1px solid #eee', paddingTop: '2rem' }}>
-        <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Customer Reviews</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '1.5rem', margin: 0 }}>Customer Reviews</h3>
+          {listing.rating > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ color: '#f59e0b', fontSize: '1.25rem' }}>{'⭐'.repeat(Math.round(listing.rating))}</span>
+              <span style={{ color: '#666', fontSize: '1rem' }}>({listing.rating.toFixed(1)} / 5)</span>
+            </div>
+          )}
+        </div>
 
         <div className="reviews-list" style={{ marginBottom: '2rem' }}>
           {listing.reviews && listing.reviews.length > 0 ? (

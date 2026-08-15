@@ -38,7 +38,7 @@ export default function SearchResults() {
         console.log('🔍 Searching for:', searchTerm, ' | Sort:', sortOption);
 
         const params = {
-          search: searchTerm,
+          q: searchTerm,
           sort: sortOption,
         };
 
@@ -47,7 +47,7 @@ export default function SearchResults() {
         if (sizeFilter) params.size = sizeFilter;
         if (brandFilter) params.brand = brandFilter;
 
-        const { data } = await api.get('/listings', { params });
+        const { data } = await api.get('/products/search', { params });
 
         const listings = Array.isArray(data)
           ? data
