@@ -35,6 +35,7 @@ const listingSchema = new mongoose.Schema({
   description: String,
   price: { type: Number, required: true },
   imageUrl: String,
+  brand: { type: String },
   discount: { type: Boolean, default: false },
   originalPrice: Number, // Store the original price when discounted
   inventory: {
@@ -49,8 +50,17 @@ const listingSchema = new mongoose.Schema({
   category: String,
   tags: [String],
   rating: { type: Number, default: 0 },
-  ratingCount: { type: Number, default: 0 }
+  ratingCount: { type: Number, default: 0 },
+  reviews: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    name: String,
+    rating: Number,
+    comment: String,
+    createdAt: { type: Date, default: Date.now }
+  }]
 }, { timestamps: true });
+
+listingSchema.index({ title: 'text', description: 'text', brand: 'text' });
 
 // --- CART ITEM SCHEMA ---
 const cartItemSchema = new mongoose.Schema({
@@ -64,7 +74,8 @@ const cartItemSchema = new mongoose.Schema({
 // --- ORDER SCHEMA ---
 // schema.js (only the Order part shown)
 const orderSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
+  guestEmail: { type: String },
   items: [
     {
       listing:  { type: mongoose.Schema.Types.ObjectId, ref: 'Listing', required: true },

@@ -166,9 +166,23 @@ api.post('/listings', ensureAuth, async (req, res) => {
 });
 
 api.get('/listings', async (req, res) => {
-  const { page = 1, limit = 10, search, sort } = req.query;
+  const { page = 1, limit = 10, search, sort, minPrice, maxPrice, size, brand } = req.query;
   let query = {};
-  if (search) query.title = { $regex: search, $options: 'i' };  
+
+  if (search) query.$text = { $search: search };
+
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = Number(minPrice);
+    if (maxPrice) query.price.$lte = Number(maxPrice);
+  }
+
+  if (brand) query.brand = brand;
+
+  if (size) {
+    query[`inventory.${size}`] = { $gt: 0 };
+  }
+
   let sortOptions = { createdAt: -1 };
   if (sort === 'priceAsc') sortOptions = { price: 1 };
   else if (sort === 'priceDesc') sortOptions = { price: -1 };
@@ -192,6 +206,31 @@ api.get('/listings/:id', async (req, res) => {
     res.json(listing);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+api.post('/listings/:id/reviews', ensureAuth, async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) return res.status(404).json({ message: 'Listing not found' });
+
+    const review = {
+      user: req.user._id,
+      name: req.user.name,
+      rating: Number(rating),
+      comment
+    };
+
+    listing.reviews.push(review);
+    listing.ratingCount = listing.reviews.length;
+    listing.rating = listing.reviews.reduce((acc, item) => item.rating + acc, 0) / listing.reviews.length;
+
+    await listing.save();
+    res.status(201).json({ message: 'Review added', listing });
+  } catch (err) {
+    res.status(500).json({ message: 'Error adding review' });
   }
 });
 
@@ -264,13 +303,27 @@ api.delete('/cart', ensureAuth, async (req, res) => {
 });
 
 // ---------- Order Routes ----------
-api.post('/orders', ensureAuth, async (req, res) => {
+api.post('/orders', async (req, res) => {
   try {
-    const { items, shippingAddress, totalAmount, paymentMethod } = req.body;
+    const { items, shippingAddress, totalAmount, paymentMethod, guestEmail } = req.body;
     if (!items || items.length === 0) return res.status(400).json({ message: 'Cart is empty. Cannot place order.' });
-    const order = new Order({ user: req.user._id, items, shippingAddress, totalAmount, paymentMethod });
+
+    const orderData = { items, shippingAddress, totalAmount, paymentMethod };
+
+    if (req.isAuthenticated()) {
+      orderData.user = req.user._id;
+    } else {
+      if (!guestEmail) return res.status(400).json({ message: 'Guest email is required' });
+      orderData.guestEmail = guestEmail;
+    }
+
+    const order = new Order(orderData);
     await order.save();
-    await CartItem.deleteMany({ user: req.user._id });
+
+    if (req.isAuthenticated()) {
+      await CartItem.deleteMany({ user: req.user._id });
+    }
+
     res.status(201).json(order);
   } catch (err) {
     console.error('Error creating order:', err);

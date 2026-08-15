@@ -88,19 +88,24 @@ const Listing = ({ isHomePage }) => {
   }
 
   return (
-    <div className="listing-container">
+    <section className="listing-container">
       <h2>{isHomePage ? "Featured Products" : "All Available Products"}</h2>
       <div className="listings-grid">
         {listings.map((item) => (
           <Link key={item._id} to={`/purchase/${item._id}`} className="listing-card">
             {item.imageUrl ? (
-              <img src={item.imageUrl} alt={item.title} className="listing-image" />
+              <img src={item.imageUrl} alt={item.title} className="listing-image" loading="lazy" />
             ) : (
               <div className="listing-image placeholder">No Image</div>
             )}
             <h3>{item.title}</h3>
             <p className="description">{item.description || 'No description available'}</p>
-            <p className="price">₹{item.price}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <p className="price">₹{item.price}</p>
+              <div style={{ color: '#f59e0b', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                ⭐ {item.rating ? item.rating.toFixed(1) : '0.0'} ({item.ratingCount || 0})
+              </div>
+            </div>
             {item.seller && (
               <p className="seller">Seller: {item.seller.name}</p>
             )}
@@ -132,7 +137,7 @@ const Listing = ({ isHomePage }) => {
       {!isHomePage && !hasMore && listings.length > 0 && (
         <div className="no-more">No more products to load</div>
       )}
-    </div>
+    </section>
   );
 };
 
