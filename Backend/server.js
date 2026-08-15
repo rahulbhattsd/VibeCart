@@ -199,6 +199,41 @@ api.get('/listings', async (req, res) => {
   }
 });
 
+api.get('/products/search', async (req, res) => {
+  const { q, sort, minPrice, maxPrice, size, brand, page = 1, limit = 10 } = req.query;
+  let query = {};
+
+  if (q) query.$text = { $search: q };
+
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = Number(minPrice);
+    if (maxPrice) query.price.$lte = Number(maxPrice);
+  }
+
+  if (brand) query.brand = brand;
+
+  if (size) {
+    query[`inventory.${size}`] = { $gt: 0 };
+  }
+
+  let sortOptions = { createdAt: -1 };
+  if (sort === 'priceAsc') sortOptions = { price: 1 };
+  else if (sort === 'priceDesc') sortOptions = { price: -1 };
+  else if (sort === 'rating') sortOptions = { rating: -1 };
+
+  try {
+    const listings = await Listing.find(query)
+      .sort(sortOptions)
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .populate('seller', 'name gmail');
+    res.json(listings);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching products' });
+  }
+});
+
 api.get('/listings/:id', async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id).populate('seller', 'name gmail');
@@ -302,6 +337,19 @@ api.delete('/cart', ensureAuth, async (req, res) => {
   }
 });
 
+// ---------- User Routes ----------
+api.put('/users/address', ensureAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    user.address = req.body.address;
+    await user.save();
+    res.json({ message: 'Address updated successfully', address: user.address });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating address', error: err.message });
+  }
+});
+
 // ---------- Order Routes ----------
 api.post('/orders', async (req, res) => {
   try {
@@ -370,7 +418,13 @@ app.use('/api', api);
 // Static and SPA fallback
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
-app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api')) {
+    res.sendFile(path.join(distPath, 'index.html'));
+  } else {
+    next();
+  }
+});
 
 // Start server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

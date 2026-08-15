@@ -324,6 +324,24 @@ const Cart = () => {
   const [address, setAddress] = useState({
     street: '', city: '', state: '', zip: ''
   });
+  const [saveAddress, setSaveAddress] = useState(false);
+
+  useEffect(() => {
+    if (!isGuest) {
+      api.get('/me')
+        .then(res => {
+          if (res.data.user && res.data.user.address && res.data.user.address.street) {
+            setAddress({
+              street: res.data.user.address.street || '',
+              city: res.data.user.address.city || '',
+              state: res.data.user.address.state || '',
+              zip: res.data.user.address.pincode || ''
+            });
+          }
+        })
+        .catch(err => console.error('Failed to load user address', err));
+    }
+  }, [isGuest]);
 
   const navigate = useNavigate();
 
@@ -417,10 +435,26 @@ const Cart = () => {
     setCheckoutStep(2);
   };
 
-  const proceedToPayment = (e) => {
+  const proceedToPayment = async (e) => {
     e.preventDefault();
     if (isGuest && !guestEmail) return alert('Please enter your email');
     if (!address.street || !address.city || !address.state || !address.zip) return alert('Please complete the address form');
+
+    if (!isGuest && saveAddress) {
+      try {
+        await api.put('/users/address', {
+          address: {
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            pincode: address.zip
+          }
+        });
+      } catch (err) {
+        console.error('Failed to save address', err);
+      }
+    }
+
     setCheckoutStep(3);
   };
 
@@ -442,19 +476,18 @@ const Cart = () => {
     try {
       if (payMethod === 'COD') {
         // Cash on Delivery
-        await api.post('/orders', { ...orderPayload, paymentMethod: 'COD' });
+        const { data: orderResponse } = await api.post('/orders', { ...orderPayload, paymentMethod: 'COD' });
         if (isGuest) {
           localStorage.removeItem('guestCart');
           setItems([]);
           window.dispatchEvent(new Event('cartUpdated'));
-          alert('Order placed successfully (Guest)');
         } else {
           await api.delete('/cart');
           setItems([]);
           window.dispatchEvent(new Event('cartUpdated'));
         }
-        navigate('/orders');
-      } else {
+        navigate(`/order-confirmation/${orderResponse._id}`, { state: { summary: { totalAmount: subtotal, itemsCount: items.length } } });
+      } else if (payMethod === 'ONLINE') {
         // Razorpay flow
         // 1) create Razorpay order
         const { data: razorOrder } = await api.post('/payments/razorpay/order', {
@@ -493,12 +526,25 @@ const Cart = () => {
               setItems([]);
               window.dispatchEvent(new Event('cartUpdated'));
             }
-            alert('Order placed successfully');
-            navigate('/orders');
+            navigate(`/order-confirmation/${razorOrder.id}`, { state: { summary: { totalAmount: subtotal, itemsCount: items.length } } });
           }
         };
 
         new window.Razorpay(options).open();
+      } else if (payMethod === 'OTHER') {
+        // Other gateway stub
+        alert('Proceeding with alternative payment gateway...');
+        const { data: orderResponse } = await api.post('/orders', { ...orderPayload, paymentMethod: 'creditCard' });
+        if (isGuest) {
+          localStorage.removeItem('guestCart');
+          setItems([]);
+          window.dispatchEvent(new Event('cartUpdated'));
+        } else {
+          await api.delete('/cart');
+          setItems([]);
+          window.dispatchEvent(new Event('cartUpdated'));
+        }
+        navigate(`/order-confirmation/${orderResponse._id}`, { state: { summary: { totalAmount: subtotal, itemsCount: items.length } } });
       }
     } catch (err) {
       console.error('Checkout error:', err);
@@ -646,6 +692,12 @@ const Cart = () => {
                   <label style={{ display: 'block', marginBottom: '0.5rem' }}>ZIP Code</label>
                   <input type="text" required value={address.zip} onChange={e => setAddress({...address, zip: e.target.value})} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #ddd' }} />
                 </div>
+                {!isGuest && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <input type="checkbox" id="saveAddress" checked={saveAddress} onChange={e => setSaveAddress(e.target.checked)} />
+                    <label htmlFor="saveAddress">Save this address to my profile</label>
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                   <button type="button" onClick={() => setCheckoutStep(1)} className="btn btn-secondary" style={{ flex: 1, padding: '1rem', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}>Back to Cart</button>
                   <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '1rem', borderRadius: '8px', background: '#6a0dad', color: '#fff', border: 'none', cursor: 'pointer' }}>Continue to Payment</button>
@@ -657,7 +709,10 @@ const Cart = () => {
           {checkoutStep === 3 && (
             <div className="payment-container" style={{ padding: '2rem', background: '#fff', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
               <div className="payment-methods">
-                <h3>Payment Method</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3>Payment Method</h3>
+                  <span style={{ fontSize: '0.9rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>🔒 Secure Checkout</span>
+                </div>
                 <label className={`payment-option ${payMethod === 'COD' ? 'selected' : ''}`}>
                   <input
                     type="radio"
@@ -678,6 +733,21 @@ const Cart = () => {
                   />
                   💳 Pay Online (Razorpay)
                 </label>
+                <label className={`payment-option ${payMethod === 'OTHER' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="OTHER"
+                    checked={payMethod === 'OTHER'}
+                    onChange={() => setPayMethod('OTHER')}
+                  />
+                  🌐 Other Gateway
+                </label>
+                {payMethod === 'OTHER' && (
+                  <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
+                    TODO: gateway integration. This is a stub for testing.
+                  </p>
+                )}
               </div>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                 <button type="button" onClick={() => setCheckoutStep(2)} className="btn btn-secondary" style={{ flex: 1, padding: '1rem', borderRadius: '8px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}>Back to Address</button>
@@ -687,7 +757,7 @@ const Cart = () => {
                   disabled={!items.length}
                   style={{ flex: 1 }}
                 >
-                  {payMethod === 'COD' ? 'Place Order' : 'Pay with Razorpay'}
+                  {payMethod === 'COD' ? 'Place Order' : payMethod === 'OTHER' ? 'Place Order (Stub)' : 'Pay with Razorpay'}
                 </button>
               </div>
             </div>

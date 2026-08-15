@@ -63,7 +63,12 @@ const ListingList = ({ listings: providedListings }) => {
               <img src={item.imageUrl} alt={item.title} />
             </Link>
             <h3>{item.title}</h3>
-            <p>₹{item.price}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <p style={{ margin: 0 }}>₹{item.price}</p>
+              <div style={{ color: '#f59e0b', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                ⭐ {item.rating ? item.rating.toFixed(1) : '0.0'} ({item.ratingCount || 0})
+              </div>
+            </div>
             <div className="size-select">
               <label htmlFor={`size-${item._id}`}>Size</label>
               <select id={`size-${item._id}`} defaultValue={sizes[0]}>

@@ -37,7 +37,12 @@ const Trendy = () => {
               : <div className="trendy-image placeholder">No Image</div>
             }
             <h3>{item.title}</h3>
-            <p className="price">₹{item.price}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0.5rem 0' }}>
+              <p className="price" style={{ margin: 0 }}>₹{item.price}</p>
+              <div style={{ color: '#f59e0b', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                ⭐ {item.rating ? item.rating.toFixed(1) : '0.0'} ({item.ratingCount || 0})
+              </div>
+            </div>
             <p className="seller">By {item.seller.name}</p>
           </Link>
         ))}
