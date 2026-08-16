@@ -490,7 +490,7 @@ const Cart = () => {
       } else if (payMethod === 'ONLINE') {
         // Razorpay flow
         // 1) create Razorpay order
-        const { data: razorOrder } = await api.post('/payments/razorpay/order', {
+        const { data: razorOrder } = await api.post('/payment/razorpay/order', {
           amount: subtotal * 100,
           currency: 'INR'
         });
@@ -505,7 +505,7 @@ const Cart = () => {
           description: 'Your Cart Checkout',
           handler: async resp => {
             // 3) verify & save payment on backend
-            await api.post('/payments/razorpay/verify', {
+            await api.post('/payment/razorpay/verify', {
               razorpayOrderId: razorOrder.id,
               razorpayPaymentId: resp.razorpay_payment_id,
               razorpaySignature: resp.razorpay_signature,

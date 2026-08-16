@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import api from '../api';
 import { useParams, useNavigate } from 'react-router-dom';
 import './Purchase.css';
 
@@ -88,10 +89,9 @@ const Purchase = () => {
     if (paymentMethod === 'razorpay') {
       try {
         // 1. Create order
-        const orderRes = await axios.post(
-          'http://localhost:5000/api/payments/razorpay/order',
-          { amount: listing.price * quantity * 100, currency: 'INR' },
-          { withCredentials: true }
+        const orderRes = await api.post(
+          '/payment/razorpay/order',
+          { amount: listing.price * quantity * 100, currency: 'INR' }
         );
         const { id: razorpayOrderId, key: razorpayKeyId } = orderRes.data;
 
@@ -105,8 +105,8 @@ const Purchase = () => {
           order_id: razorpayOrderId,
           handler: async (response) => {
             // 3. Verify & place order
-            const { data: verifyData } = await axios.post(
-              'http://localhost:5000/api/payments/razorpay/verify',
+            const { data: verifyData } = await api.post(
+              '/payment/razorpay/verify',
               {
                 razorpayOrderId,
                 razorpayPaymentId: response.razorpay_payment_id,
@@ -115,8 +115,7 @@ const Purchase = () => {
                 shippingAddress: {},    // replace with actual address data
                 totalAmount: listing.price * quantity,
                 paymentMethod: 'razorpay'
-              },
-              { withCredentials: true }
+              }
             );
             navigate(`/order-confirmation/${verifyData._id || 'razorpay-order'}`, { state: { summary: { totalAmount: listing.price * quantity, itemsCount: 1 } } });
           }
