@@ -17,7 +17,7 @@ export default function Footer() {
   return (
     <footer className="footer section-p1">
       <div className="col">
-        <img src={logo} alt="Logo" className="logo-img" />
+        <img loading="lazy" src={logo} alt="Logo" className="logo-img" />
         <h4>Contact VibeCart</h4>
         <p><span>Address:</span> Jabalpur, Madhya Pradesh</p>
         <p><span>Phone:</span> 7898372676</p>
@@ -25,9 +25,9 @@ export default function Footer() {
         <div className="follow">
           <h4>Follow us</h4>
           <div className="icon">
-            <a href="https://facebook.com"><img src={fbIcon} alt="Facebook" className="social" /></a>
-            <a href="https://instagram.com"><img src={instaIcon} alt="Instagram" className="social" /></a>
-            <a href="https://twitter.com"><img src={twitterIcon} alt="Twitter" className="social" /></a>
+            <a href="https://facebook.com"><img loading="lazy" src={fbIcon} alt="Facebook" className="social" /></a>
+            <a href="https://instagram.com"><img loading="lazy" src={instaIcon} alt="Instagram" className="social" /></a>
+            <a href="https://twitter.com"><img loading="lazy" src={twitterIcon} alt="Twitter" className="social" /></a>
           </div>
         </div>
       </div>
@@ -54,11 +54,11 @@ export default function Footer() {
         <h4>Install App</h4>
         <p>From App Store or Google Play</p>
         <div className="row">
-          <a href="#"><img src={appStoreImg} alt="App Store" /></a>
-          <a href="#"><img src={playStoreImg} alt="Google Play" /></a>
+          <a href="#"><img loading="lazy" src={appStoreImg} alt="App Store" /></a>
+          <a href="#"><img loading="lazy" src={playStoreImg} alt="Google Play" /></a>
         </div>
         <p>Secure Payment Gateways</p>
-        <a href="#"><img src={payImage} alt="Payment Methods" /></a>
+        <a href="#"><img loading="lazy" src={payImage} alt="Payment Methods" /></a>
       </div>
 
       <div className="copyright">

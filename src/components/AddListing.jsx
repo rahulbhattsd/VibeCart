@@ -139,7 +139,7 @@ const AddListing = () => {
           {uploading ? 'Uploading...' : 'Upload Image'}
         </button>
         {form.imageUrl && (
-          <img src={form.imageUrl} alt="preview" className="listing-image" />
+          <img loading="lazy" src={form.imageUrl} alt="preview" className="listing-image" />
         )}
         <button type="button" onClick={handleSubmit}>Add Listing</button>
       </div>

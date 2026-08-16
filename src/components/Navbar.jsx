@@ -112,7 +112,7 @@ const Navbar = () => {
             onFocus={() => { if (searchTerm.trim() && autocompleteResults.length > 0) setShowDropdown(true); }}
           />
           <button type="submit" className="search-button" aria-label="Search">
-            <img src={searchIcon} alt="Search" className="search-icon-img" />
+            <img loading="lazy" src={searchIcon} alt="Search" className="search-icon-img" />
           </button>
 
           {showDropdown && autocompleteResults.length > 0 && (
@@ -130,7 +130,7 @@ const Navbar = () => {
                     style={{ textDecoration: 'none', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}
                     onClick={() => { setSearchTerm(''); setShowDropdown(false); setIsMobile(false); }}
                   >
-                    {item.imageUrl && <img src={item.imageUrl} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />}
+                    {item.imageUrl && <img loading="lazy" src={item.imageUrl} alt={item.title} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />}
                     <div>
                       <div style={{ fontWeight: '500' }}>{item.title}</div>
                       <div style={{ fontSize: '0.8rem', color: '#666' }}>₹{item.price}</div>
@@ -156,7 +156,7 @@ const Navbar = () => {
           <>
             <li>
               <Link to="/profile" title="Profile">
-                <img
+                <img loading="lazy"
                   src={profileIcon}
                   alt="Profile"
                   style={{ height: '2rem', borderRadius: '50%' }}
@@ -175,7 +175,7 @@ const Navbar = () => {
 
         <li>
           <Link to="/cart" className="cart-link" title="Cart" style={{ position: 'relative' }}>
-            <img
+            <img loading="lazy"
               src={cartIcon}
               alt="Cart"
               style={{ height: '2rem', borderRadius: '50%' }}

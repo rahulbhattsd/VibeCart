@@ -60,7 +60,7 @@ const ListingList = ({ listings: providedListings }) => {
         return (
           <div key={item._id} className="listing-card">
             <Link to={`/purchase/${item._id}`}>
-              <img src={item.imageUrl} alt={item.title} />
+              <img loading="lazy" src={item.imageUrl} alt={item.title} />
             </Link>
             <h3>{item.title}</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

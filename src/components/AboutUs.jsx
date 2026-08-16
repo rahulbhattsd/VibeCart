@@ -31,7 +31,7 @@ const AboutUs = () => {
         <h2>Meet the Team</h2>
         <div className="team-members">
           <div className="team-member">
-            <img src="src\models\me.jpg" alt="logo"></img>
+            <img loading="lazy" src="src\models\me.jpg" alt="logo"></img>
             <h4>Rahul Bhatt</h4>
             <p>Founder & Full Stack Developer</p>
           </div>

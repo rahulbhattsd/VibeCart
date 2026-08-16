@@ -33,10 +33,10 @@ const OrderDetail = () => {
           <li key={item._id} className="order-item">
             <div className="order-item-image">
               <Link to={`/purchase/${item.listing._id}`}>
-                <img
+                <img loading="lazy"
                   src={item.listing.imageUrl}
                   alt={item.listing.title}
-                  loading="lazy"
+
                 />
               </Link>
             </div>
