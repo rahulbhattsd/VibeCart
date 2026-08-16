@@ -7,12 +7,12 @@
   position: relative;
   z-index: 10;
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Logo */
 .logo {
-  color: #652c9dcb;
+  color: var(--clr-accent);
   font-size: 1.8rem;
   font-weight: bold;
   z-index: 11;
@@ -37,10 +37,10 @@
 .nav-links li a,
 .logout-btn {
   text-decoration: none;
-  color: #333;
+  color: var(--clr-text);
   font-size: 1rem;
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: none;
   border: none;
   cursor: pointer;
@@ -59,7 +59,7 @@
 .mobile-menu-icon {
   display: none;
   font-size: 1.8rem;
-  color: #333;
+  color: var(--clr-text);
   background: none;
   border: none;
   cursor: pointer;
@@ -77,10 +77,10 @@
   right: 20px;
   background-color: white;
   width: 200px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 10px 0;
   list-style: none;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-md);
   z-index: 11;
 }
 
@@ -96,7 +96,7 @@
   display: block;
   width: 100%;
   padding: 10px 0;
-  color: #333;
+  color: var(--clr-text);
   text-decoration: none;
   background: none;
   border: none;

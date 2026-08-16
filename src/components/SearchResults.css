@@ -7,7 +7,7 @@
 :root {
   --clr-bg:           #f7f7f9;
   --clr-bg-gradient:  linear-gradient(135deg, #f7f7f9 0%, #e4eaf3 100%);
-  --clr-card:         #ffffff;
+
   --clr-card-glass:   rgba(255,255,255,0.85);
   --clr-border:       #dde1e7;
   --clr-primary:      #1f2a38;
@@ -133,14 +133,14 @@ body {
 .size-select select {
   padding: 4px 8px;
   border: 1px solid var(--clr-border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 .actions button {
   margin-right: 8px;
   padding: 8px 12px;
   font-size: var(--font-sm);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background var(--transition);
 }

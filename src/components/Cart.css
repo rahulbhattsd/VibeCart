@@ -1,24 +1,7 @@
 /* Cart.css */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-:root {
-  --clr-bg: #f7f7f9;
-  --clr-page: #ffffff;
-  --clr-primary: #1f2a38;
-  --clr-secondary: #5a6a7a;
-  --clr-accent: #6a0dad;
-  --clr-accent-hover: #5a0c9c;
-  --clr-danger: #ef4444;
-  --clr-danger-hover: #dc2626;
-  --clr-text: #252f3f;
-  --clr-muted: #6b7280;
-  --clr-border: #dde1e7;
-  --radius: 1rem;
-  --spacing: 1.25rem;
-  --transition: 0.3s ease;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
-}
+
 
 * {
   box-sizing: border-box;
@@ -35,7 +18,7 @@ body {
 .cart-container {
   max-width: 1200px;
   margin: 2rem auto;
-  background: var(--clr-page);
+  background: var(--clr-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
@@ -113,7 +96,7 @@ body {
 }
 
 .cart-items-container {
-  background: var(--clr-page);
+  background: var(--clr-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
@@ -155,7 +138,7 @@ body {
   width: 80px;
   height: 80px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius);
 }
 
 .product-info {
@@ -238,7 +221,7 @@ body {
 }
 
 .cart-summary {
-  background: var(--clr-page);
+  background: var(--clr-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   padding: var(--spacing);

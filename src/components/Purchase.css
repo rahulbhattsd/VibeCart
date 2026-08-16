@@ -6,9 +6,9 @@
   padding: 2rem;
   max-width: 960px;
   margin: 0 auto;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  background: var(--clr-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
 }
 
 .purchase img {
@@ -16,8 +16,8 @@
   height: auto;
   max-height: 400px;
   object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
 }
 
 .details {
@@ -35,7 +35,7 @@
 .price {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #6a0dad;
+  color: var(--clr-accent);
   margin-bottom: 1.5rem;
 }
 
@@ -58,7 +58,7 @@
   margin-top: 0.5rem;
   padding: 0.6rem 0.75rem;
   border: 1px solid #dde1e7;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 1rem;
   transition: border-color 0.2s;
 }
@@ -66,7 +66,7 @@
 .options select:focus,
 .options input[type="number"]:focus {
   outline: none;
-  border-color: #6a0dad;
+  border-color: var(--clr-accent);
 }
 
 .actions {
@@ -82,14 +82,14 @@
   font-weight: 600;
   text-align: center;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius);
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.2s, background-color 0.2s;
 }
 
 .btn-primary {
-  background-color: #6a0dad;
-  color: #ffffff;
+  background-color: var(--clr-accent);
+  color: var(--clr-card);
 }
 
 .btn-primary:hover,

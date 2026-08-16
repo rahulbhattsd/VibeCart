@@ -1,15 +1,15 @@
 /* OrderDetail.css */
 :root {
   --primary-color: #4a90e2;
-  --secondary-color: #f8f9fa;
-  --accent-color: #6c5ce7;
+  --secondary-color: var(--clr-page-accent);
+  --accent-color: var(--clr-accent);
   --success-color: #00b894;
-  --text-color: #333;
-  --light-text: #666;
+  --text-color: var(--clr-text);
+  --light-text: var(--clr-muted);
   --border-color: #e0e0e0;
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --box-shadow: var(--shadow-sm);
   --hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --border-radius: 8px;
+  --border-radius: var(--radius);
 }
 
 .order-detail {
