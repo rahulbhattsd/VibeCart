@@ -103,7 +103,7 @@ const Listing = ({ isHomePage }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <p className="price">₹{item.price}</p>
               <div style={{ color: '#f59e0b', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                ⭐ {item.rating ? item.rating.toFixed(1) : '0.0'} ({item.ratingCount || 0})
+                {'⭐'.repeat(Math.round(item.rating || 0))} {item.rating ? item.rating.toFixed(1) : '0.0'} ({item.ratingCount || 0})
               </div>
             </div>
             {item.seller && (

@@ -89,7 +89,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
     clientID:     process.env.GOOGLE_CLIENT_ID || 'dummy',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy',
-    callbackURL:  `${process.env.API_BASE_URL || 'http://localhost:5000'}/api/auth/google/callback`
+    callbackURL:  `${process.env.API_BASE_URL || 'https://vibecart-eo6e.onrender.com'}/api/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -119,7 +119,7 @@ const api = express.Router();
 
 api.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 api.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
-  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/`);
+  res.redirect(`${process.env.FRONTEND_URL || 'https://vibecart-eo6e.onrender.com'}/`);
 });
 
 api.post('/auth/signup', async (req, res) => {
@@ -272,7 +272,7 @@ api.post('/listings/:id/reviews', ensureAuth, async (req, res) => {
     };
 
     listing.reviews.push(review);
-    listing.numReviews = listing.reviews.length;
+    listing.ratingCount = listing.reviews.length;
     listing.rating = listing.reviews.reduce((acc, item) => item.rating + acc, 0) / listing.reviews.length;
 
     await listing.save();
