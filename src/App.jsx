@@ -40,7 +40,7 @@ const Home = () => {
             <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem' }}>
               {recentlyViewed.map(item => (
                 <Link key={item.id} to={`/purchase/${item.id}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: '150px' }}>
-                  <img src={item.imageUrl} alt={item.title} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px' }} />
+                  <img loading="lazy" src={item.imageUrl} alt={item.title} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px' }} />
                   <p style={{ margin: '0.5rem 0 0 0', fontWeight: '500', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</p>
                 </Link>
               ))}

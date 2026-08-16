@@ -32,7 +32,7 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <div className="profile-card">
-        <img 
+        <img loading="lazy"
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBuop37VPM8lX6Cr8AL6HdFViC1PskX1mCQA&s" 
           alt="User Avatar" 
           className="profile-avatar"

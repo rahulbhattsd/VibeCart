@@ -52,11 +52,11 @@ const Orders = () => {
             <li key={order._id} className="order-item">
               {imageUrl ? (
                 <Link to={`/purchase/${listing._id}`}>
-                  <img
+                  <img loading="lazy"
                     src={imageUrl}
                     alt={listing.title || 'Ordered product'}
                     className="order-image"
-                    loading="lazy"
+
                   />
                 </Link>
               ) : (

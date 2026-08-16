@@ -9,6 +9,7 @@ const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
 const path = require('path');
+const mcache = require('memory-cache');
 
 // Load environment variables
 dotenv.config();
@@ -30,12 +31,31 @@ app.use(cors({
   credentials: true,
 }));
 
+// Simple cache
+const cache = (duration) => {
+  return (req, res, next) => {
+    let key = '__express__' + req.originalUrl || req.url
+    let cachedBody = mcache.get(key)
+    if (cachedBody) {
+      res.send(cachedBody)
+      return
+    } else {
+      res.sendResponse = res.send
+      res.send = (body) => {
+        mcache.put(key, body, duration * 1000);
+        res.sendResponse(body)
+      }
+      next()
+    }
+  }
+}
+
 // Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI || 'mongodb://localhost:27017/vibecart' }),
   cookie: { httpOnly: true, sameSite: 'lax', secure: false }
 }));
 
@@ -47,12 +67,16 @@ app.use(passport.session());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB error:', err));
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/vibecart')
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// Passport Google Strategy
-passport.serializeUser((user, done) => done(null, user._id));
+// ---------- Authentication Routes ----------
+// Passport serialization
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
 passport.deserializeUser(async (id, done) => {
   try {
     const u = await User.findById(id);
@@ -63,13 +87,15 @@ passport.deserializeUser(async (id, done) => {
 });
 
 passport.use(new GoogleStrategy({
-    clientID:     process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:  `${process.env.API_BASE_URL}/api/auth/google/callback`
+    clientID:     process.env.GOOGLE_CLIENT_ID || 'dummy',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy',
+    callbackURL:  `${process.env.API_BASE_URL || 'http://localhost:5000'}/api/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const gmail = profile.emails[0].value;
+      let gmail = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null;
+      if (!gmail) return done(new Error('No email found from Google'), false);
+
       let user = await User.findOne({ $or: [{ googleId: profile.id }, { gmail }] });
       if (user) {
         user.googleId = profile.id;
@@ -82,48 +108,40 @@ passport.use(new GoogleStrategy({
           name:     profile.displayName
         });
       }
-      done(null, user);
+      return done(null, user);
     } catch (err) {
-      done(err);
+      return done(err, false);
     }
   }
 ));
 
-// Auth check middleware
-function ensureAuth(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.status(401).json({ message: 'Unauthorized' });
-}
-
-// Create API router
 const api = express.Router();
 
-// Payments routes
-const paymentsRouter = require('./payment');
-api.use('/payments', paymentsRouter);
-
-// ---------- Auth Routes ----------
-api.post('/check-gmail', async (req, res) => {
-  const { gmail } = req.body;
-  const exists = await User.exists({ gmail });
-  res.json({ exists: !!exists });
+api.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+api.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+  res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/`);
 });
 
-api.post('/signup', async (req, res) => {
-  const { name, gmail, pass, role } = req.body;
+api.post('/auth/signup', async (req, res) => {
   try {
-    if (await User.exists({ gmail })) return res.status(400).json({ message: 'User already exists' });
+    const { name, gmail, pass, role } = req.body;
+    let existing = await User.findOne({ gmail });
+    if (existing) return res.status(400).json({ message: 'User already exists' });
+
     const hashed = await bcrypt.hash(pass, 10);
-    const newUser = await User.create({ name, gmail, pass: hashed, role });
-    res.status(201).json({ message: 'Signup successful', user: newUser });
+    const u = await User.create({ name, gmail, pass: hashed, role });
+    req.login(u, err => {
+      if (err) return res.status(500).json({ message: 'Error logging in after signup' });
+      res.json({ message: 'Signup successful', user: u });
+    });
   } catch (err) {
     res.status(500).json({ message: 'Signup error', error: err.message });
   }
 });
 
-api.post('/login', async (req, res) => {
-  const { gmail, pass } = req.body;
+api.post('/auth/login', async (req, res) => {
   try {
+    const { gmail, pass } = req.body;
     const user = await User.findOne({ gmail });
     if (!user || !user.pass) return res.status(400).json({ message: 'Invalid credentials' });
     const ok = await bcrypt.compare(pass, user.pass);
@@ -137,24 +155,19 @@ api.post('/login', async (req, res) => {
   }
 });
 
-api.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-const CLIENT_HOME_URL = process.env.CLIENT_HOME_URL || 'http://localhost:5173';
-api.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
-  res.redirect(`${CLIENT_HOME_URL}/login?google=success`);
-});
-
-api.get('/logout', (req, res) => {
-  req.logout(err => {
-    if (err) return res.status(500).json({ message: 'Logout failed' });
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid');
-      res.json({ message: 'Logout successful' });
-    });
+api.post('/auth/logout', (req, res) => {
+  req.logout(() => {
+    res.json({ message: 'Logged out successfully' });
   });
 });
 
-// ---------- Listing Routes ----------
+// Helper for protected routes
+const ensureAuth = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  res.status(401).json({ message: 'Unauthorized' });
+};
+
+// ---------- Listings / Products ----------
 api.post('/listings', ensureAuth, async (req, res) => {
   if (req.user.role !== 'seller') return res.status(403).json({ message: 'Only sellers can add listings' });
   try {
@@ -165,7 +178,7 @@ api.post('/listings', ensureAuth, async (req, res) => {
   }
 });
 
-api.get('/listings', async (req, res) => {
+api.get('/listings', cache(60), async (req, res) => {
   const { page = 1, limit = 10, search, sort, minPrice, maxPrice, size, brand } = req.query;
   let query = {};
 
@@ -199,7 +212,7 @@ api.get('/listings', async (req, res) => {
   }
 });
 
-api.get('/products/search', async (req, res) => {
+api.get('/products/search', cache(60), async (req, res) => {
   const { q, sort, minPrice, maxPrice, size, brand, page = 1, limit = 10 } = req.query;
   let query = {};
 
@@ -259,18 +272,19 @@ api.post('/listings/:id/reviews', ensureAuth, async (req, res) => {
     };
 
     listing.reviews.push(review);
-    listing.ratingCount = listing.reviews.length;
+    listing.numReviews = listing.reviews.length;
     listing.rating = listing.reviews.reduce((acc, item) => item.rating + acc, 0) / listing.reviews.length;
 
     await listing.save();
-    res.status(201).json({ message: 'Review added', listing });
-  } catch (err) {
-    res.status(500).json({ message: 'Error adding review' });
+    res.status(201).json({ message: 'Review added' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// ---------- Trending Route ----------
-api.get('/trendings', async (req, res) => {
+
+api.get('/trendings', cache(60), async (req, res) => {
   try {
     const trendings = await Listing.aggregate([
       { $sample: { size: 8 } },
@@ -337,8 +351,8 @@ api.delete('/cart', ensureAuth, async (req, res) => {
   }
 });
 
-// ---------- User Routes ----------
-api.put('/users/address', ensureAuth, async (req, res) => {
+// ---------- Address Routes ----------
+api.put('/user/address', ensureAuth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -351,31 +365,12 @@ api.put('/users/address', ensureAuth, async (req, res) => {
 });
 
 // ---------- Order Routes ----------
-api.post('/orders', async (req, res) => {
+api.post('/orders', ensureAuth, async (req, res) => {
   try {
-    const { items, shippingAddress, totalAmount, paymentMethod, guestEmail } = req.body;
-    if (!items || items.length === 0) return res.status(400).json({ message: 'Cart is empty. Cannot place order.' });
-
-    const orderData = { items, shippingAddress, totalAmount, paymentMethod };
-
-    if (req.isAuthenticated()) {
-      orderData.user = req.user._id;
-    } else {
-      if (!guestEmail) return res.status(400).json({ message: 'Guest email is required' });
-      orderData.guestEmail = guestEmail;
-    }
-
-    const order = new Order(orderData);
-    await order.save();
-
-    if (req.isAuthenticated()) {
-      await CartItem.deleteMany({ user: req.user._id });
-    }
-
-    res.status(201).json(order);
+    const newOrder = await Order.create({ ...req.body, user: req.user._id });
+    res.status(201).json(newOrder);
   } catch (err) {
-    console.error('Error creating order:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: 'Server error creating order' });
   }
 });
 
@@ -415,25 +410,20 @@ api.get('/me', ensureAuth, (req, res) => res.json({ user: req.user }));
 // Mount API router
 app.use('/api', api);
 
-// Static and SPA fallback
-const distPath = path.join(__dirname, '../dist');
-app.use(express.static(distPath));
-app.use((req, res, next) => {
-  if (req.method === 'GET' && !req.path.startsWith('/api')) {
-    res.sendFile(path.join(distPath, 'index.html'));
-  } else {
-    next();
-  }
-});
+// ---------- Payment API (Razorpay) ----------
+const paymentApi = require('./payment');
+app.use('/api/payment', paymentApi);
+
+
+// Fallback for SPA
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  });
+}
 
 // Start server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
-
-
-
-
-
-
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -164,17 +164,17 @@ const Purchase = () => {
       <div className="purchase-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
         <div className="image-gallery">
           <div style={{ overflow: 'hidden', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-            <img
+            <img loading="lazy"
               src={mainImage}
               alt={listing.title}
-              loading="lazy"
+
               style={{ width: '100%', display: 'block', transition: 'transform 0.3s ease' }}
               onMouseOver={e => e.currentTarget.style.transform = 'scale(1.5)'}
               onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
             />
           </div>
           <div className="thumbnails" style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <img
+            <img loading="lazy"
               src={listing.imageUrl}
               alt="Thumbnail"
               style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: mainImage === listing.imageUrl ? '2px solid #6a0dad' : '2px solid transparent' }}
@@ -264,7 +264,7 @@ const Purchase = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '2rem' }}>
             {relatedProducts.map(prod => (
               <a key={prod._id} href={`/purchase/${prod._id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                <img src={prod.imageUrl} alt={prod.title} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />
+                <img loading="lazy"  src={prod.imageUrl} alt={prod.title} style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />
                 <h4 style={{ margin: '0', fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prod.title}</h4>
                 <p style={{ margin: '0.25rem 0 0 0', fontWeight: 'bold', color: '#6a0dad' }}>₹{prod.price}</p>
               </a>

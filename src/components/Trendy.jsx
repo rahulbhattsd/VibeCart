@@ -33,7 +33,7 @@ const Trendy = () => {
         {trendings.map(item => (
           <Link key={item._id} to={`/purchase/${item._id}`} className="trendy-card">
             {item.imageUrl
-              ? <img src={item.imageUrl} alt={item.title} className="trendy-image"/>
+              ? <img loading="lazy" src={item.imageUrl} alt={item.title} className="trendy-image"/>
               : <div className="trendy-image placeholder">No Image</div>
             }
             <h3>{item.title}</h3>
