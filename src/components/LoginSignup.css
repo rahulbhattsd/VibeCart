@@ -5,17 +5,17 @@
     max-width: 400px;
     margin: 4rem auto;
     padding: 2.5rem 2rem;
-    background: #ffffff;
-    border-radius: 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: var(--clr-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
     text-align: center;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-family-primary), Arial, sans-serif;
   }
   
   .form-container h2 {
     margin-bottom: 1.5rem;
     font-size: 1.75rem;
-    color: #333;
+    color: var(--clr-text);
   }
   
   .form-container form {
@@ -29,22 +29,22 @@
     padding: 0.75rem 1rem;
     font-size: 1rem;
     border: 1px solid #ddd;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-sm);
     transition: border-color 0.2s;
   }
   
   .form-container input:focus,
   .form-container select:focus {
     outline: none;
-    border-color: #6c5ce7;
+    border-color: var(--clr-accent);
   }
   
   .form-container button {
     padding: 0.75rem;
     font-size: 1rem;
     border: none;
-    border-radius: 0.5rem;
-    background: #6c5ce7;
+    border-radius: var(--radius-sm);
+    background: var(--clr-accent);
     color: white;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
@@ -66,7 +66,7 @@
   
   .form-container .toggle-btn {
     background: transparent;
-    color: #6c5ce7;
+    color: var(--clr-accent);
     font-size: 0.95rem;
   }
   
@@ -74,6 +74,6 @@
     text-decoration: underline;
   }
   button{
-   background-color:#6c5ce7 ;  
+   background-color:var(--clr-accent) ;
   }
   

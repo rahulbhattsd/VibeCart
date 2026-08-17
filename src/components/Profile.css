@@ -6,8 +6,8 @@
 
 .profile-card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   padding: 2rem;
   text-align: center;
   max-width: 400px;
@@ -32,7 +32,7 @@
   padding: 10px 20px;
   background: #cc99ff;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 1rem;
   color: white;

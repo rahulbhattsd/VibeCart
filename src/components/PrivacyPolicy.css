@@ -6,9 +6,9 @@
   --primary-light: #e6ccff;
   --primary-dark: #9966cc;
   --accent-color: #6633cc;
-  --text-dark: #333333;
-  --text-light: #ffffff;
-  --text-medium: #666666;
+  --text-dark: var(--clr-text);
+  --text-light: var(--clr-card);
+  --text-medium: var(--clr-muted);
   --background-light: #f9f5ff;
   --success-color: #4CAF50;
   --warning-color: #ff6b6b;
@@ -22,7 +22,7 @@
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  background: linear-gradient(135deg, var(--background-light), #ffffff);
+  background: linear-gradient(135deg, var(--background-light), var(--clr-card));
   animation: fadeIn 0.8s ease-in-out;
 }
 
@@ -33,7 +33,7 @@
 
 .privacy-policy-card {
   background-color: white;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 10px 40px rgba(204, 153, 255, 0.2);
   width: 100%;
   max-width: 900px;
@@ -112,12 +112,12 @@
 
 .privacy-content::-webkit-scrollbar-track {
   background: var(--background-light);
-  border-radius: 10px;
+  border-radius: var(--radius);
 }
 
 .privacy-content::-webkit-scrollbar-thumb {
   background: var(--primary-light);
-  border-radius: 10px;
+  border-radius: var(--radius);
   transition: background var(--transition-speed);
 }
 
@@ -172,7 +172,7 @@
 .contact-info {
   background-color: var(--background-light);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   display: inline-block;
 }
 

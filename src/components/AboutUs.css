@@ -5,8 +5,8 @@
   --primary-color: #cc99ff;
   --primary-light: #e6ccff;
   --primary-dark: #9966cc;
-  --text-dark: #333333;
-  --text-light: #ffffff;
+  --text-dark: var(--clr-text);
+  --text-light: var(--clr-card);
   --background-light: #f9f5ff;
   --transition-speed: 0.3s;
 }
@@ -31,7 +31,7 @@
   text-align: center;
   padding: 4rem 2rem;
   background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-  border-radius: 12px;
+  border-radius: var(--radius);
   margin-bottom: 3rem;
   box-shadow: 0 8px 30px rgba(204, 153, 255, 0.3);
   transform-origin: center;
@@ -110,7 +110,7 @@
 .value-card {
   background-color: white;
   padding: 2rem;
-  border-radius: 12px;
+  border-radius: var(--radius);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   flex: 1;
   min-width: 250px;
@@ -172,8 +172,8 @@
 /* Team Section */
 .team-section {
   padding: 4rem 0;
-  background-color: #ffffff;
-  border-radius: 12px;
+  background-color: var(--clr-card);
+  border-radius: var(--radius);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   margin: 3rem 0;
 }
@@ -249,7 +249,7 @@
   text-align: center;
   padding: 4rem 2rem;
   background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
-  border-radius: 12px;
+  border-radius: var(--radius);
   color: var(--text-light);
   position: relative;
   overflow: hidden;
