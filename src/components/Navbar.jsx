@@ -86,7 +86,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await api.get('/logout', { withCredentials: true });
+      await api.post('/auth/logout', { withCredentials: true });
       localStorage.removeItem('user');
       setUser(null);
       navigate('/login');

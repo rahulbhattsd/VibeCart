@@ -30,7 +30,7 @@ export default function LoginSignup() {
 
   const submit = async e => {
     e.preventDefault();
-    const endpoint = isLogin ? '/login' : '/signup';
+    const endpoint = isLogin ? '/auth/login' : '/auth/signup';
 
     if (!isLogin) {
       const { exists } = (await api.post('/check-gmail', { gmail: formData.email })).data;
