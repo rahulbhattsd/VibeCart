@@ -122,6 +122,16 @@ api.get('/auth/google/callback', passport.authenticate('google', { failureRedire
   res.redirect(`${process.env.FRONTEND_URL || 'https://vibecart-eo6e.onrender.com'}/`);
 });
 
+
+api.post('/check-gmail', async (req, res) => {
+  try {
+    const existing = await User.findOne({ gmail: req.body.gmail });
+    res.json({ exists: !!existing });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 api.post('/auth/signup', async (req, res) => {
   try {
     const { name, gmail, pass, role } = req.body;
