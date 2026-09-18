@@ -188,6 +188,7 @@ api.post('/listings', ensureAuth, async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 api.get('/listings', cache(60), async (req, res) => {
   const { page = 1, limit = 10, search, sort, minPrice, maxPrice, size, brand } = req.query;
   let query = {};
@@ -202,10 +203,77 @@ api.get('/listings', cache(60), async (req, res) => {
 
   if (brand) query.brand = brand;
 
+=======
+api.get('/listings/price-bounds', async (req, res) => {
+  const { category, search } = req.query;
+  let matchQuery = {};
+  if (category && category !== 'all') {
+    matchQuery.category = { $regex: new RegExp(`^${category}$`, 'i') };
+  }
+  if (search) {
+    matchQuery.title = { $regex: search, $options: 'i' };
+  }
+
+  try {
+    const result = await Listing.aggregate([
+      { $match: matchQuery },
+      {
+        $group: {
+          _id: null,
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    if (result.length > 0 && result[0].minPrice !== null && result[0].maxPrice !== null) {
+      res.json({
+        minPrice: Math.floor(result[0].minPrice),
+        maxPrice: Math.ceil(result[0].maxPrice),
+        count: result[0].count
+      });
+    } else {
+      res.json({ minPrice: 0, maxPrice: 10000, count: 0 });
+    }
+  } catch (err) {
+    console.error('Error fetching price bounds:', err);
+    res.status(500).json({ message: 'Error fetching price bounds' });
+  }
+});
+
+api.get('/listings', async (req, res) => {
+  const { page = 1, limit = 10, search, sort, minPrice, maxPrice, category, size, brand } = req.query;
+  let query = {};
+  if (search) query.title = { $regex: search, $options: 'i' };
+  if (category && category !== 'all') {
+    query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+  }
+  if (brand) {
+    query.$or = [
+      { tags: { $regex: brand, $options: 'i' } },
+      { title: { $regex: brand, $options: 'i' } }
+    ];
+  }
+>>>>>>> c9cf160 (feat(api): add price range filtering, bounds endpoint, and price indexing)
   if (size) {
     query[`inventory.${size}`] = { $gt: 0 };
   }
 
+<<<<<<< HEAD
+=======
+  // MongoDB price range query
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    const priceFilter = {};
+    const parsedMin = parseFloat(minPrice);
+    const parsedMax = parseFloat(maxPrice);
+    if (!isNaN(parsedMin)) priceFilter.$gte = parsedMin;
+    if (!isNaN(parsedMax)) priceFilter.$lte = parsedMax;
+    if (Object.keys(priceFilter).length > 0) {
+      query.price = priceFilter;
+    }
+  }
+>>>>>>> c9cf160 (feat(api): add price range filtering, bounds endpoint, and price indexing)
   let sortOptions = { createdAt: -1 };
   if (sort === 'priceAsc') sortOptions = { price: 1 };
   else if (sort === 'priceDesc') sortOptions = { price: -1 };

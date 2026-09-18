@@ -61,6 +61,9 @@ const listingSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 listingSchema.index({ title: 'text', description: 'text', brand: 'text' });
+// Performance indexes for price filtering
+listingSchema.index({ price: 1 });
+listingSchema.index({ category: 1, price: 1 });
 
 // --- CART ITEM SCHEMA ---
 const cartItemSchema = new mongoose.Schema({
