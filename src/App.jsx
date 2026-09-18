@@ -1,8 +1,10 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Banner from './components/Banner';
 import Footer from './components/Footer.jsx';
+import ChatWidget from './components/ChatWidget.jsx';
 
 const Profile = lazy(() => import('./components/Profile'));
 const LoginSignup = lazy(() => import('./components/LoginSignup'));
@@ -17,9 +19,6 @@ const SearchResults = lazy(() => import('./components/SearchResults'));
 const Trendy = lazy(() => import('./components/Trendy'));
 const AboutUs = lazy(() => import('./components/AboutUs.jsx'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy.jsx'));
-
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
 const Home = () => {
   const [recentlyViewed, setRecentlyViewed] = useState([]);
@@ -47,7 +46,7 @@ const Home = () => {
             </div>
           </div>
         )}
-        <Listing />
+        <Listing isHomePage={true} />
         <Footer />
       </section>
     </main>
@@ -61,27 +60,26 @@ const App = () => {
       <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
         <main>
           <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginSignup />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/add-listing" element={<AddListing />} />
-          <Route path="/listings" element={<Listing />} />
-
-         <Route path="/cart" element={<Cart />} />
-         <Route path="/purchase/:id" element={<Purchase />} />
-         <Route path="/orders" element={<Orders />} />
-         <Route path="/orders/:id" element={<OrderDetail />} />
-         <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
-        <Route path="/search" element={<SearchResults />} />
-         <Route path="/trending" element={<Trendy />} />
-         <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginSignup />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/add-listing" element={<AddListing />} />
+            <Route path="/listings" element={<Listing />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/purchase/:id" element={<Purchase />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:id" element={<OrderDetail />} />
+            <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+            <Route path="/search" element={<SearchResults />} />
+            <Route path="/trending" element={<Trendy />} />
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
           </Routes>
         </main>
       </Suspense>
+      <ChatWidget />
     </>
   );
 };
 
 export default App;
-
