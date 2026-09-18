@@ -417,6 +417,10 @@ api.delete('/orders/:id', ensureAuth, async (req, res) => {
 // User route
 api.get('/me', ensureAuth, (req, res) => res.json({ user: req.user }));
 
+// ---------- Customer Support Chatbot Route ----------
+const { handleChatStream } = require('./chatbot');
+api.post('/chat', handleChatStream);
+
 // Mount API router
 app.use('/api', api);
 
