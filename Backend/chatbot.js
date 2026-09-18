@@ -1,4 +1,4 @@
-// Backend/chatbot.js
+﻿// Backend/chatbot.js
 const { Groq } = require('groq-sdk');
 const mongoose = require('mongoose');
 const { Order, Listing } = require('./schema');
@@ -56,7 +56,7 @@ async function retrieveStoreContext(userMessage, reqUser) {
       const order = await Order.findById(objectIdMatch[0]).populate('items.listing', 'title price imageUrl');
       if (order) {
         const itemSummary = order.items.map(item => 
-          `• ${item.listing?.title || 'Product'} (Size: ${item.size || 'Standard'}, Qty: ${item.quantity}, Price: ₹${item.price})`
+          `â€¢ ${item.listing?.title || 'Product'} (Size: ${item.size || 'Standard'}, Qty: ${item.quantity}, Price: â‚¹${item.price})`
         ).join('\n');
 
         contextNotes.push(
@@ -64,7 +64,7 @@ async function retrieveStoreContext(userMessage, reqUser) {
           `Order ID: ${order._id}\n` +
           `Status: Confirmed / Processing for Dispatch\n` +
           `Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}\n` +
-          `Total Amount: ₹${order.totalAmount}\n` +
+          `Total Amount: â‚¹${order.totalAmount}\n` +
           `Payment Method: ${order.paymentMethod}\n` +
           `Items Ordered:\n${itemSummary}`
         );
@@ -83,7 +83,7 @@ async function retrieveStoreContext(userMessage, reqUser) {
       if (recentOrders.length > 0) {
         const ordersList = recentOrders.map(o => {
           const itemsDesc = o.items.map(i => `${i.listing?.title || 'Item'} (x${i.quantity})`).join(', ');
-          return `• Order #${o._id} | Placed: ${new Date(o.createdAt).toLocaleDateString('en-IN')} | Total: ₹${o.totalAmount} | Method: ${o.paymentMethod} | Items: ${itemsDesc}`;
+          return `â€¢ Order #${o._id} | Placed: ${new Date(o.createdAt).toLocaleDateString('en-IN')} | Total: â‚¹${o.totalAmount} | Method: ${o.paymentMethod} | Items: ${itemsDesc}`;
         }).join('\n');
 
         contextNotes.push(`[DATABASE CONTEXT: USER'S RECENT ORDERS]\n${ordersList}`);
@@ -115,12 +115,12 @@ async function retrieveStoreContext(userMessage, reqUser) {
             { description: { $regex: token, $options: 'i' } },
           ]
         }));
-        listings = await Listing.find({ $or: regexQueries }).limit(5).select('title price category inventory tags rating');
+        listings = await Listing.find({ $or: regexQueries }).limit(5).select('_id title price category inventory tags rating');
       }
 
       // If no keyword match or general request, fetch 4 featured products
       if (listings.length === 0 && hasProductQuery) {
-        listings = await Listing.find().sort({ rating: -1, createdAt: -1 }).limit(4).select('title price category inventory tags rating');
+        listings = await Listing.find().sort({ rating: -1, createdAt: -1 }).limit(4).select('_id title price category inventory tags rating');
       }
 
       if (listings.length > 0) {
@@ -134,7 +134,9 @@ async function retrieveStoreContext(userMessage, reqUser) {
             }
           }
           const availableSizesStr = sizes.length > 0 ? sizes.join(', ') : 'UK 6, UK 7, UK 8, UK 9, UK 10';
-          return `• "${p.title}" - ₹${p.price} (Category: ${p.category || 'Sneakers'}, Available Sizes: ${availableSizesStr})`;
+          const frontendUrl = process.env.FRONTEND_URL || 'https://vibecart-eo6e.onrender.com';
+          const productLink = frontendUrl + '/purchase/' + String(p._id);
+          return '* "' + p.title + '" - Rs.' + p.price + ' | Sizes: ' + availableSizesStr + ' | Direct Link: ' + productLink;
         }).join('\n');
 
         contextNotes.push(`[DATABASE CONTEXT: AVAILABLE PRODUCTS]\n${productsSummary}`);
@@ -149,7 +151,7 @@ async function retrieveStoreContext(userMessage, reqUser) {
 
 // Build the system prompt
 function buildSystemPrompt(retrievedContext, userName) {
-  return `You are "VibeBot", the official AI customer support assistant for VibeCart — a premier footwear and lifestyle e-commerce store in India.
+  return `You are "VibeBot", the official AI customer support assistant for VibeCart â€” a premier footwear and lifestyle e-commerce store in India.
 
 ROLE & SCOPE:
 - You ONLY handle customer support for VibeCart.
@@ -167,21 +169,21 @@ ROLE & SCOPE:
 STORE POLICIES & KNOWLEDGE BASE:
 - Store Name: VibeCart
 - Customer Greeting: ${userName ? `The customer's name is ${userName}. Address them warmly.` : 'Address the customer warmly and professionally.'}
-- Shipping Policy: Standard delivery takes 3 to 5 business days across India. Free shipping on all orders above ₹999. Express delivery (1-2 business days) available in metro areas.
+- Shipping Policy: Standard delivery takes 3 to 5 business days across India. Free shipping on all orders above â‚¹999. Express delivery (1-2 business days) available in metro areas.
 - Return & Exchange Policy: 7-day hassle-free return and exchange window starting from the delivery date. Items must be unworn, in pristine original condition with tags and shoebox intact. Refunds are initiated to original payment source within 5-7 business days upon inspection.
 - Footwear Size Guide: VibeCart uses standard UK sizing (UK 4 to UK 13). If a customer is between sizes, suggest half-size up for athletic/running shoes or true-to-size for casual sneakers.
 - Payment Methods: Cash on Delivery (COD) and Online Payments via Razorpay (Credit/Debit Cards, UPI, Net Banking, EMI).
 - Human Support Escalation:
-  • Email: support@vibecart.com
-  • WhatsApp: +91-9876543210 (Hours: Mon - Sat, 9:00 AM - 7:00 PM IST)
+  â€¢ Email: support@vibecart.com
+  â€¢ WhatsApp: +91-9876543210 (Hours: Mon - Sat, 9:00 AM - 7:00 PM IST)
 
 FORMATTING GUIDELINES:
 - Keep answers concise, clear, and helpful.
 - Use bolding, bullet points, and markdown for readable lists.
-- Mention prices in Indian Rupees (₹).
+- Mention prices in Indian Rupees (â‚¹).
 
 ${retrievedContext ? `LIVE STORE DATA:\n${retrievedContext}\n` : ''}
-Use the live store data above to answer accurately when applicable. If an order ID was provided and matches database context, give its specific status. If asked for products, suggest items from the available products list.`;
+Use the live store data above to answer accurately when applicable. If an order ID was provided and matches database context, give its specific status. If asked for products, suggest items from the available products list and ALWAYS include the direct product link so the customer can view or buy immediately.`;
 }
 
 // Controller for POST /api/chat
@@ -306,3 +308,5 @@ module.exports = {
   retrieveStoreContext,
   buildSystemPrompt
 };
+
+

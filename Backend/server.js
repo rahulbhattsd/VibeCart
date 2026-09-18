@@ -270,11 +270,24 @@ api.get('/listings', async (req, res) => {
   }
 });
 
-api.get('/products/search', cache(60), async (req, res) => {
+api.get('/products/search', async (req, res) => {
   const { q, sort, minPrice, maxPrice, size, brand, page = 1, limit = 10 } = req.query;
   let query = {};
 
-  if (q) query.$text = { $search: q };
+  // Use $text for default/relevance sort; use regex for price/rating sorts so MongoDB can use indexes
+  const useTextSearch = q && (sort === 'latest' || !sort);
+  if (useTextSearch) {
+    query.$text = { $search: q };
+  } else if (q) {
+    // Regex-based search — works with any sort order
+    query.$or = [
+      { title:       { $regex: q, $options: 'i' } },
+      { description: { $regex: q, $options: 'i' } },
+      { brand:       { $regex: q, $options: 'i' } },
+      { tags:        { $regex: q, $options: 'i' } },
+      { category:    { $regex: q, $options: 'i' } },
+    ];
+  }
 
   if (minPrice || maxPrice) {
     query.price = {};
@@ -282,26 +295,41 @@ api.get('/products/search', cache(60), async (req, res) => {
     if (maxPrice) query.price.$lte = Number(maxPrice);
   }
 
-  if (brand) query.brand = brand;
+  if (brand) {
+    query.$or = [
+      { brand:  { $regex: brand, $options: 'i' } },
+      { title:  { $regex: brand, $options: 'i' } },
+      { tags:   { $regex: brand, $options: 'i' } },
+    ];
+  }
 
   if (size) {
     query[`inventory.${size}`] = { $gt: 0 };
   }
 
-  let sortOptions = { createdAt: -1 };
-  if (sort === 'priceAsc') sortOptions = { price: 1 };
+  let sortOptions = {};
+  if (sort === 'priceAsc')  sortOptions = { price: 1 };
   else if (sort === 'priceDesc') sortOptions = { price: -1 };
-  else if (sort === 'rating') sortOptions = { rating: -1 };
+  else if (sort === 'rating')    sortOptions = { rating: -1 };
+  else if (useTextSearch)        sortOptions = { score: { $meta: 'textScore' } };
+  else                           sortOptions = { createdAt: -1 };
 
   try {
-    const listings = await Listing.find(query)
+    let findQuery = Listing.find(query);
+    // Only project textScore when using $text
+    if (useTextSearch) {
+      findQuery = findQuery.select({ score: { $meta: 'textScore' } });
+    }
+    const listings = await findQuery
       .sort(sortOptions)
-      .skip((page - 1) * limit)
+      .skip((Number(page) - 1) * Number(limit))
       .limit(Number(limit))
       .populate('seller', 'name gmail');
-    res.json(listings);
+
+    res.json({ listings, total: listings.length });
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching products' });
+    console.error('Search error:', err);
+    res.status(500).json({ message: 'Error fetching products', error: err.message });
   }
 });
 
