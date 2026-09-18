@@ -188,22 +188,6 @@ api.post('/listings', ensureAuth, async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-api.get('/listings', cache(60), async (req, res) => {
-  const { page = 1, limit = 10, search, sort, minPrice, maxPrice, size, brand } = req.query;
-  let query = {};
-
-  if (search) query.$text = { $search: search };
-
-  if (minPrice || maxPrice) {
-    query.price = {};
-    if (minPrice) query.price.$gte = Number(minPrice);
-    if (maxPrice) query.price.$lte = Number(maxPrice);
-  }
-
-  if (brand) query.brand = brand;
-
-=======
 api.get('/listings/price-bounds', async (req, res) => {
   const { category, search } = req.query;
   let matchQuery = {};
@@ -255,13 +239,10 @@ api.get('/listings', async (req, res) => {
       { title: { $regex: brand, $options: 'i' } }
     ];
   }
->>>>>>> c9cf160 (feat(api): add price range filtering, bounds endpoint, and price indexing)
   if (size) {
     query[`inventory.${size}`] = { $gt: 0 };
   }
 
-<<<<<<< HEAD
-=======
   // MongoDB price range query
   if (minPrice !== undefined || maxPrice !== undefined) {
     const priceFilter = {};
@@ -273,7 +254,6 @@ api.get('/listings', async (req, res) => {
       query.price = priceFilter;
     }
   }
->>>>>>> c9cf160 (feat(api): add price range filtering, bounds endpoint, and price indexing)
   let sortOptions = { createdAt: -1 };
   if (sort === 'priceAsc') sortOptions = { price: 1 };
   else if (sort === 'priceDesc') sortOptions = { price: -1 };
